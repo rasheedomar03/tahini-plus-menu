@@ -232,6 +232,25 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
 
 .note { text-align: center; padding: 3rem 1rem; color: var(--ink-muted); font-size: 0.875rem; }
 
+/* ── Debug log ───────────────────────── */
+#debug-panel {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+  background: oklch(15% 0.005 75); color: oklch(85% 0.01 75);
+  font-family: monospace; font-size: 0.72rem;
+  max-height: 40vh; overflow-y: auto;
+  border-top: 2px solid var(--terracotta);
+}
+#debug-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.4rem 0.75rem; background: oklch(10% 0.004 75);
+  cursor: pointer; position: sticky; top: 0;
+}
+#debug-header span { font-weight: 600; color: var(--terracotta); }
+#debug-lines { padding: 0.35rem 0.75rem 0.75rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.dbg-line { padding: 0.15rem 0; border-bottom: 1px solid oklch(25% 0.005 75); }
+.dbg-line.err { color: oklch(70% 0.15 37); }
+.dbg-line.ok  { color: oklch(65% 0.12 145); }
+
 @media (max-width: 500px) {
   .photos-grid { grid-template-columns: repeat(5, 1fr); gap: 0.35rem; }
 }
@@ -278,7 +297,34 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
 <div class="toast" id="toast"></div>
 <input type="file" id="global-file-input" accept="image/*" style="display:none">
 
+<!-- ── Debug log (tap to expand) ─────── -->
+<div id="debug-panel">
+  <div id="debug-header" onclick="toggleDebug()">
+    <span>Debug log</span>
+    <span id="debug-toggle">▲ tap to hide</span>
+  </div>
+  <div id="debug-lines"></div>
+</div>
+
 <script>
+// ── On-screen debug log ───────────────────────────────────────────
+var debugOpen = true;
+function toggleDebug() {
+  debugOpen = !debugOpen;
+  document.getElementById('debug-lines').style.display = debugOpen ? '' : 'none';
+  document.getElementById('debug-toggle').textContent = debugOpen ? '▲ tap to hide' : '▼ tap to show';
+}
+function dbg(msg, type) {
+  var el = document.createElement('div');
+  el.className = 'dbg-line' + (type ? ' ' + type : '');
+  var t = new Date();
+  var ts = t.getHours() + ':' + String(t.getMinutes()).padStart(2,'0') + ':' + String(t.getSeconds()).padStart(2,'0');
+  el.textContent = '[' + ts + '] ' + msg;
+  var lines = document.getElementById('debug-lines');
+  lines.appendChild(el);
+  lines.scrollTop = lines.scrollHeight;
+}
+
 // ── CONFIG — hardcoded so any device can use admin without setup ──
 var FB_CONFIG = {
   apiKey: "AIzaSyCrI-gYB4uoKnJbTlYA0bpwFwDP7RwFues",
@@ -318,14 +364,19 @@ function checkPin() {
 
 // ── Firebase init ─────────────────────────────────────────────────
 function initFirebase() {
+  dbg('Initializing Firebase…');
   try {
     var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FB_CONFIG);
+    dbg('App OK · project: ' + FB_CONFIG.projectId, 'ok');
     fbDb      = firebase.firestore();
+    dbg('Firestore OK', 'ok');
     fbStorage = firebase.storage();
+    dbg('Storage OK · bucket: ' + FB_CONFIG.storageBucket, 'ok');
     document.getElementById('conn-dot').style.background = 'oklch(55% 0.15 145)';
     document.getElementById('conn-label').textContent = 'Connected';
     loadItems();
   } catch(e) {
+    dbg('Firebase init error: ' + e.message, 'err');
     document.getElementById('conn-dot').style.background = 'oklch(50% 0.15 37)';
     document.getElementById('conn-label').textContent = 'Error';
     showToast('Firebase error: ' + e.message, true);
@@ -506,9 +557,10 @@ function clearUploadErr(slug) {
 }
 
 function addPhoto(slug) {
+  dbg('addPhoto called · slug=' + slug);
   if (!pendingFile && !pendingUrl) { showToast('Choose a photo first.', true); return; }
   var item = allItems.find(function(i) { return i.slug === slug; });
-  if (!item) return;
+  if (!item) { dbg('item not found', 'err'); return; }
   if (item.photos.length >= 5) { showToast('Max 5 photos per item.', true); return; }
 
   clearUploadErr(slug);
@@ -516,17 +568,24 @@ function addPhoto(slug) {
   btn.disabled = true; btn.textContent = 'Uploading…';
 
   if (pendingFile) {
+    dbg('File: ' + pendingFile.name + ' · ' + Math.round(pendingFile.size/1024) + ' KB · ' + pendingFile.type);
+
     // Guard: Storage must be ready
     if (!fbStorage) {
+      dbg('fbStorage is null!', 'err');
       showUploadErr(slug, 'Firebase Storage not initialized. Refresh the page and try again.');
       btn.disabled = false; btn.textContent = 'Add this photo'; return;
     }
 
     var ext = (pendingFile.name.split('.').pop() || 'jpg').toLowerCase().replace('jpeg','jpg');
+    var path = 'menu-photos/' + slug + '_' + (new Date().getTime()) + '.' + ext;
+    dbg('Storage path: ' + path);
     var storageRef;
     try {
-      storageRef = fbStorage.ref('menu-photos/' + slug + '_' + (new Date().getTime()) + '.' + ext);
+      storageRef = fbStorage.ref(path);
+      dbg('Ref created OK');
     } catch(refErr) {
+      dbg('Ref error: ' + refErr.message, 'err');
       showUploadErr(slug, 'Could not create storage reference: ' + refErr.message);
       btn.disabled = false; btn.textContent = 'Add this photo'; return;
     }
@@ -542,6 +601,7 @@ function addPhoto(slug) {
 
     function uploadErrorMsg(err) {
       var code = err.code || '';
+      dbg('Upload error · code=' + code + ' · msg=' + err.message, 'err');
       if (code === 'storage/unauthorized')
         return 'Storage rules are blocking the upload. Go to Firebase Console → Storage → Rules and set: allow read, write: if true;';
       if (code === 'storage/canceled')
@@ -558,13 +618,16 @@ function addPhoto(slug) {
     var task;
     try {
       task = storageRef.put(pendingFile);
+      dbg('put() called — waiting for upload…');
     } catch(putErr) {
+      dbg('put() threw: ' + putErr.message, 'err');
       showUploadErr(slug, 'Could not start upload: ' + putErr.message);
       resetUploadUI(); return;
     }
 
     // 45-second hard timeout
     var uploadTimer = setTimeout(function() {
+      dbg('Upload timed out after 45 s', 'err');
       try { task.cancel(); } catch(e) {}
       showUploadErr(slug, 'Upload timed out after 45 seconds. Check Firebase Storage rules and your connection.');
       resetUploadUI();
@@ -572,14 +635,16 @@ function addPhoto(slug) {
 
     // Progress bar
     task.on('state_changed', function(snap) {
-      if (snap.totalBytes > 0) {
-        progFill.style.width = ((snap.bytesTransferred / snap.totalBytes) * 100) + '%';
-      }
+      var pct = snap.totalBytes > 0 ? Math.round((snap.bytesTransferred / snap.totalBytes) * 100) : 0;
+      progFill.style.width = pct + '%';
+      dbg('Progress: ' + pct + '% (' + snap.bytesTransferred + '/' + snap.totalBytes + ')');
     });
 
     task.then(function() {
+      dbg('Upload complete — getting download URL…', 'ok');
       return storageRef.getDownloadURL();
     }).then(function(url) {
+      dbg('Download URL: ' + url.substring(0, 60) + '…', 'ok');
       clearTimeout(uploadTimer);
       item.photos.push(url);
       saveToFirestore(slug, item.photos, function() {
@@ -587,6 +652,7 @@ function addPhoto(slug) {
         closeAddPanel(slug);
         resetUploadUI();
         showToast('Photo saved!');
+        dbg('Saved to Firestore OK', 'ok');
       });
     }).catch(function(err) {
       clearTimeout(uploadTimer);
