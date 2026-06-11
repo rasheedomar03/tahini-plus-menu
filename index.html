@@ -1842,7 +1842,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!initFb(cfg)) { showToast('Could not connect to Firebase.', true); return; }
       localStorage.setItem(FB_KEY, JSON.stringify(cfg));
       setupBox.style.display = 'none';
-      showToast('Connected to Firebase!');
     }
 
     saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
