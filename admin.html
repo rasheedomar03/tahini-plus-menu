@@ -689,11 +689,28 @@ function removePhoto(slug, idx) {
 
 // ── Save to Firestore ─────────────────────────────────────────────
 function saveToFirestore(slug, photos, cb) {
+  dbg('Saving to Firestore · slug=' + slug + ' · ' + photos.length + ' photos');
   var update = {};
   update[slug] = photos;
+
+  var timer = setTimeout(function() {
+    dbg('Firestore save timed out after 20 s', 'err');
+    showToast('Firestore save timed out. Check Firestore rules in Firebase Console.', true);
+  }, 20000);
+
   fbDb.collection('menu').doc('photos').set(update, { merge: true })
-    .then(function() { if (cb) cb(); })
-    .catch(function(e) { showToast(e.message || 'Save failed.', true); });
+    .then(function() {
+      clearTimeout(timer);
+      dbg('Firestore save OK', 'ok');
+      if (cb) cb();
+    })
+    .catch(function(e) {
+      clearTimeout(timer);
+      dbg('Firestore save error: ' + (e.code || e.message), 'err');
+      showToast((e.code === 'permission-denied'
+        ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+        : e.message || 'Firestore save failed.'), true);
+    });
 }
 
 // ── Refresh one card in place ─────────────────────────────────────
