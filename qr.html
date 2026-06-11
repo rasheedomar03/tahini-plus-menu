@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tahini Plus — Table QR Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Outfit', system-ui, sans-serif;
+    background: oklch(96% 0.006 82);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 2.5rem 2.25rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: 0 4px 24px oklch(20% 0.006 75 / 0.10), 0 1px 4px oklch(20% 0.006 75 / 0.06);
+    max-width: 320px;
+    width: 100%;
+  }
+
+  .logo-area { text-align: center; }
+
+  .brand {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: oklch(20% 0.01 75);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .brand em { font-style: italic; color: oklch(53% 0.108 37); }
+
+  .tagline {
+    font-size: 0.72rem;
+    color: oklch(50% 0.01 75);
+    letter-spacing: 0.04em;
+    margin-top: 0.35rem;
+  }
+
+  .qr-wrap {
+    background: oklch(98.5% 0.004 82);
+    border-radius: 14px;
+    padding: 1rem;
+    border: 1px solid oklch(90% 0.008 82);
+  }
+
+  #qr-canvas canvas { display: block; border-radius: 6px; }
+
+  .cta {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: oklch(30% 0.008 75);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .url {
+    font-size: 0.65rem;
+    color: oklch(60% 0.01 75);
+    letter-spacing: 0.03em;
+  }
+
+  .divider {
+    width: 40px;
+    height: 2px;
+    background: oklch(53% 0.108 37);
+    border-radius: 2px;
+    opacity: 0.4;
+  }
+
+  .halal {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: oklch(42% 0.08 145);
+    background: oklch(94% 0.04 145);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+  }
+
+  .print-btn {
+    background: oklch(53% 0.108 37);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.65rem 1.5rem;
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .print-btn:hover { opacity: 0.85; }
+
+  .hint {
+    font-size: 0.72rem;
+    color: oklch(55% 0.01 75);
+    text-align: center;
+    max-width: 280px;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; justify-content: flex-start; padding-top: 1in; }
+    .print-btn, .hint { display: none; }
+    .card { box-shadow: none; border: 1px solid #ddd; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-area">
+    <div class="brand">Tahini <em>Plus</em></div>
+    <div class="tagline">Halal Kitchen · Houston, TX</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="qr-wrap">
+    <div id="qr-canvas"></div>
+  </div>
+
+  <div class="cta">Scan to view our full menu</div>
+  <div class="url">rasheedomar03.github.io/tahini-plus-menu</div>
+  <div class="halal">Halal Certified</div>
+</div>
+
+<button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+<p class="hint">Print one per table, or save as PDF to send to your printer.</p>
+
+<script>
+  QRCode.toCanvas(document.createElement('canvas'),
+    'https://rasheedomar03.github.io/tahini-plus-menu/',
+    { width: 200, margin: 1, color: { dark: '#281f1a', light: '#ffffff' } },
+    function(err, canvas) {
+      if (!err) document.getElementById('qr-canvas').appendChild(canvas);
+    }
+  );
+</script>
+</body>
+</html>
