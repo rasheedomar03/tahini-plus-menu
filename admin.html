@@ -640,12 +640,16 @@ function addPhoto(slug) {
       dbg('Progress: ' + pct + '% (' + snap.bytesTransferred + '/' + snap.totalBytes + ')');
     });
 
-    task.then(function() {
-      dbg('Upload complete — getting download URL…', 'ok');
-      return storageRef.getDownloadURL();
-    }).then(function(url) {
-      dbg('Download URL: ' + url.substring(0, 60) + '…', 'ok');
+    task.then(function(snapshot) {
+      dbg('Upload complete — building URL from path…', 'ok');
       clearTimeout(uploadTimer);
+      // Build the public URL directly — avoids getDownloadURL() which can hang on mobile.
+      // Works as long as Storage rules allow: allow read: if true
+      var url = 'https://firebasestorage.googleapis.com/v0/b/'
+        + encodeURIComponent(FB_CONFIG.storageBucket)
+        + '/o/' + encodeURIComponent(path)
+        + '?alt=media';
+      dbg('URL built: ' + url.substring(0, 80) + '…', 'ok');
       item.photos.push(url);
       saveToFirestore(slug, item.photos, function() {
         refreshCard(item);
