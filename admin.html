@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tahini Plus · Photo Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --canvas:     oklch(97% 0.008 82);
+  --surface:    oklch(99.5% 0.003 82);
+  --ink:        oklch(20% 0.006 75);
+  --ink-muted:  oklch(50% 0.01 75);
+  --olive:      oklch(45% 0.065 82);
+  --terracotta: oklch(53% 0.108 37);
+  --border:     oklch(88% 0.01 82);
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Outfit', system-ui, sans-serif;
+  --radius: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  background: var(--canvas);
+  color: var(--ink);
+  min-height: 100dvh;
+}
+
+/* ── Header ── */
+.admin-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.admin-logo { height: 44px; width: auto; }
+.admin-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+.admin-title em { font-style: italic; color: var(--terracotta); }
+.admin-sub { font-size: 0.75rem; color: var(--ink-muted); margin-top: 0.15rem; }
+
+/* ── Setup box ── */
+.setup-box {
+  max-width: 680px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.setup-box h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+.setup-box p { font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 1rem; line-height: 1.6; }
+.setup-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.token-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  background: var(--canvas);
+  color: var(--ink);
+  outline: none;
+}
+.token-input:focus { border-color: var(--terracotta); }
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--terracotta); color: #fff; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--ink); }
+.status-badge {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.status-badge.connected { background: oklch(93% 0.04 145); color: oklch(36% 0.1 145); }
+.status-badge.disconnected { background: oklch(94% 0.02 37); color: var(--terracotta); }
+
+/* ── Save bar ── */
+.save-bar {
+  max-width: 680px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+}
+.save-msg { font-size: 0.8rem; color: var(--ink-muted); }
+
+/* ── Items grid ── */
+.items-grid {
+  max-width: 680px;
+  margin: 0 auto 4rem;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.photo-card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+}
+.photo-card:hover { border-color: oklch(78% 0.032 37); }
+.photo-thumb {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: oklch(95.5% 0.009 37);
+  border: 1.5px dashed oklch(80% 0.028 37);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photo-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-thumb-empty::after {
+  content: '';
+  display: block;
+  width: 28px; height: 28px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9a98a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z'/%3E%3Ccircle cx='12' cy='13' r='4'/%3E%3C/svg%3E") center/contain no-repeat;
+  opacity: 0.6;
+}
+.photo-info { flex: 1; min-width: 0; }
+.photo-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+}
+.photo-url-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  background: var(--canvas);
+  color: var(--ink);
+  outline: none;
+}
+.photo-url-input:focus { border-color: var(--terracotta); }
+.photo-url-input::placeholder { color: oklch(72% 0.012 75); }
+
+/* ── Loading / empty states ── */
+.loading-msg, .empty-msg {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+}
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: var(--ink);
+  color: #fff;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  transition: transform 0.25s ease;
+  z-index: 100;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: oklch(40% 0.12 37); }
+</style>
+</head>
+<body>
+
+<header class="admin-header">
+  <img src="logo.png" alt="Tahini Plus" class="admin-logo">
+  <div>
+    <div class="admin-title">Tahini <em>Plus</em> · Photo Manager</div>
+    <div class="admin-sub">Add food photos to your live menu</div>
+  </div>
+</header>
+
+<div class="setup-box" id="setup-box">
+  <h2>GitHub Setup</h2>
+  <p>
+    Enter your GitHub Personal Access Token to save photos to the live menu.
+    Create one at <strong>github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens</strong>.
+    Grant it <strong>Contents: Read &amp; Write</strong> access to the <code>tahini-plus-menu</code> repo.
+  </p>
+  <div class="setup-row">
+    <input type="password" id="token-input" class="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <button class="btn btn-primary" onclick="connect()">Connect</button>
+    <span class="status-badge disconnected" id="status-badge">Not connected</span>
+  </div>
+</div>
+
+<div class="save-bar">
+  <button class="btn btn-primary" id="save-btn" onclick="savePhotos()" disabled>Save All Photos</button>
+  <span class="save-msg" id="save-msg">Connect GitHub to save changes to the live menu.</span>
+</div>
+
+<div class="items-grid" id="items-grid">
+  <div class="loading-msg">Connect to GitHub above to load your menu items.</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const REPO  = 'rasheedomar03/tahini-plus-menu';
+const BRANCH = 'master';
+let ghToken = localStorage.getItem('tahini-gh-token') || '';
+let photosMap = {};
+let photosSHA = null;
+let connected = false;
+
+// ── Restore token on load ──────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  if (ghToken) {
+    document.getElementById('token-input').value = ghToken;
+    connect();
+  }
+});
+
+// ── Connect + load ─────────────────────────────────────────────────
+async function connect() {
+  ghToken = document.getElementById('token-input').value.trim();
+  if (!ghToken) { showToast('Please enter a GitHub token.', true); return; }
+
+  localStorage.setItem('tahini-gh-token', ghToken);
+  setStatus('Connecting…');
+
+  try {
+    // Verify token works by fetching the repo
+    const res = await ghFetch(`https://api.github.com/repos/${REPO}`);
+    if (!res.ok) throw new Error('Token invalid or repo not found (' + res.status + ')');
+
+    // Load existing photos.json
+    await loadPhotosJson();
+
+    // Load menu items
+    await loadItems();
+
+    connected = true;
+    setStatus('connected');
+    document.getElementById('save-btn').disabled = false;
+    document.getElementById('save-msg').textContent = 'Photos save instantly to the live menu when you click Save.';
+  } catch(e) {
+    setStatus('disconnected');
+    showToast(e.message, true);
+  }
+}
+
+function setStatus(state) {
+  const badge = document.getElementById('status-badge');
+  if (state === 'connected') {
+    badge.textContent = 'Connected';
+    badge.className = 'status-badge connected';
+  } else if (state === 'disconnected') {
+    badge.textContent = 'Not connected';
+    badge.className = 'status-badge disconnected';
+  } else {
+    badge.textContent = state;
+    badge.className = 'status-badge disconnected';
+  }
+}
+
+// ── Load photos.json from GitHub ───────────────────────────────────
+async function loadPhotosJson() {
+  const res = await ghFetch(`https://api.github.com/repos/${REPO}/contents/photos.json?ref=${BRANCH}`);
+  if (res.status === 404) {
+    photosMap = {};
+    photosSHA = null;
+    return;
+  }
+  if (!res.ok) throw new Error('Failed to load photos.json');
+  const data = await res.json();
+  photosSHA = data.sha;
+  photosMap = JSON.parse(atob(data.content.replace(/\n/g, '')));
+}
+
+// ── Load menu items from index.html ───────────────────────────────
+async function loadItems() {
+  const res = await fetch('index.html?v=' + Date.now());
+  if (!res.ok) throw new Error('Could not load index.html');
+  const text = await res.text();
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  const photoEls = doc.querySelectorAll('.item-photo[data-item]');
+
+  const grid = document.getElementById('items-grid');
+  if (!photoEls.length) {
+    grid.innerHTML = '<div class="empty-msg">No photo slots found in menu. Run fix-menu.js first.</div>';
+    return;
+  }
+
+  const cards = [];
+  photoEls.forEach(function(el) {
+    const slug = el.getAttribute('data-item');
+    const item = el.closest('.item') || el.parentElement;
+    const nameEl = item ? item.querySelector('.item-name') : null;
+    const rawName = nameEl ? nameEl.textContent.trim() : slug;
+    const name = rawName.replace(/\s+/g, ' ');
+    const url = photosMap[slug] || '';
+    cards.push({ slug, name, url });
+  });
+
+  grid.innerHTML = cards.map(function(c) {
+    const thumbInner = c.url
+      ? '<img src="' + escHtml(c.url) + '" alt="" onerror="this.style.display=\'none\'">'
+      : '<span class="photo-thumb-empty"></span>';
+    return '<div class="photo-card" id="card-' + c.slug + '">' +
+      '<div class="photo-thumb" id="thumb-' + c.slug + '">' + thumbInner + '</div>' +
+      '<div class="photo-info">' +
+        '<div class="photo-name">' + escHtml(c.name) + '</div>' +
+        '<input type="url" class="photo-url-input" data-slug="' + c.slug + '"' +
+          ' placeholder="Paste photo URL here…"' +
+          ' value="' + escHtml(c.url) + '"' +
+          ' oninput="previewUrl(this)">' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Live URL preview ───────────────────────────────────────────────
+function previewUrl(input) {
+  const slug = input.getAttribute('data-slug');
+  const url = input.value.trim();
+  const thumb = document.getElementById('thumb-' + slug);
+  if (!thumb) return;
+  if (url) {
+    thumb.innerHTML = '<img src="' + escHtml(url) + '" alt="" onerror="this.style.display=\'none\'">';
+  } else {
+    thumb.innerHTML = '<span class="photo-thumb-empty"></span>';
+  }
+}
+
+// ── Save all to GitHub ─────────────────────────────────────────────
+async function savePhotos() {
+  if (!connected) { showToast('Not connected.', true); return; }
+
+  const saveBtn = document.getElementById('save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+
+  const newPhotos = {};
+  document.querySelectorAll('.photo-url-input').forEach(function(input) {
+    const url = input.value.trim();
+    if (url) newPhotos[input.getAttribute('data-slug')] = url;
+  });
+
+  try {
+    const content = btoa(JSON.stringify(newPhotos, null, 2));
+    const body = { message: 'Update food photos', content, branch: BRANCH };
+    if (photosSHA) body.sha = photosSHA;
+
+    const res = await ghFetch(
+      `https://api.github.com/repos/${REPO}/contents/photos.json`,
+      { method: 'PUT', body: JSON.stringify(body) }
+    );
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Save failed (' + res.status + ')');
+    }
+    const data = await res.json();
+    photosSHA = data.content.sha;
+    photosMap = newPhotos;
+
+    const count = Object.keys(newPhotos).length;
+    showToast(count + ' photo' + (count === 1 ? '' : 's') + ' saved. Live in ~30 seconds.');
+    document.getElementById('save-msg').textContent = 'Saved ' + count + ' photo(s). GitHub Pages rebuilds in ~30 seconds.';
+  } catch(e) {
+    showToast(e.message, true);
+  }
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Save All Photos';
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+function ghFetch(url, opts) {
+  const headers = { Authorization: 'token ' + ghToken, Accept: 'application/vnd.github+json' };
+  if (opts && opts.body) headers['Content-Type'] = 'application/json';
+  return fetch(url, Object.assign({ headers }, opts || {}));
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.className = 'toast'; }, 4000);
+}
+</script>
+</body>
+</html>
