@@ -232,24 +232,6 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
 
 .note { text-align: center; padding: 3rem 1rem; color: var(--ink-muted); font-size: 0.875rem; }
 
-/* ── Debug log ───────────────────────── */
-#debug-panel {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
-  background: oklch(15% 0.005 75); color: oklch(85% 0.01 75);
-  font-family: monospace; font-size: 0.72rem;
-  max-height: 40vh; overflow-y: auto;
-  border-top: 2px solid var(--terracotta);
-}
-#debug-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.4rem 0.75rem; background: oklch(10% 0.004 75);
-  cursor: pointer; position: sticky; top: 0;
-}
-#debug-header span { font-weight: 600; color: var(--terracotta); }
-#debug-lines { padding: 0.35rem 0.75rem 0.75rem; display: flex; flex-direction: column; gap: 0.2rem; }
-.dbg-line { padding: 0.15rem 0; border-bottom: 1px solid oklch(25% 0.005 75); }
-.dbg-line.err { color: oklch(70% 0.15 37); }
-.dbg-line.ok  { color: oklch(65% 0.12 145); }
 
 @media (max-width: 500px) {
   .photos-grid { grid-template-columns: repeat(5, 1fr); gap: 0.35rem; }
@@ -297,33 +279,8 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
 <div class="toast" id="toast"></div>
 <input type="file" id="global-file-input" accept="image/*" style="display:none">
 
-<!-- ── Debug log (tap to expand) ─────── -->
-<div id="debug-panel">
-  <div id="debug-header" onclick="toggleDebug()">
-    <span>Debug log</span>
-    <span id="debug-toggle">▲ tap to hide</span>
-  </div>
-  <div id="debug-lines"></div>
-</div>
-
 <script>
-// ── On-screen debug log ───────────────────────────────────────────
-var debugOpen = true;
-function toggleDebug() {
-  debugOpen = !debugOpen;
-  document.getElementById('debug-lines').style.display = debugOpen ? '' : 'none';
-  document.getElementById('debug-toggle').textContent = debugOpen ? '▲ tap to hide' : '▼ tap to show';
-}
-function dbg(msg, type) {
-  var el = document.createElement('div');
-  el.className = 'dbg-line' + (type ? ' ' + type : '');
-  var t = new Date();
-  var ts = t.getHours() + ':' + String(t.getMinutes()).padStart(2,'0') + ':' + String(t.getSeconds()).padStart(2,'0');
-  el.textContent = '[' + ts + '] ' + msg;
-  var lines = document.getElementById('debug-lines');
-  lines.appendChild(el);
-  lines.scrollTop = lines.scrollHeight;
-}
+function dbg() {}
 
 // ── CONFIG — hardcoded so any device can use admin without setup ──
 var FB_CONFIG = {
