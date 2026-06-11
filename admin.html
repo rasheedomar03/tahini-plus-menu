@@ -210,6 +210,13 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
   height: 100%; background: var(--terracotta);
   transition: width 0.2s; width: 0%;
 }
+.upload-err {
+  display: none; background: oklch(95% 0.04 37);
+  border: 1px solid oklch(70% 0.12 37); border-radius: 8px;
+  padding: 0.65rem 0.875rem; font-size: 0.8rem;
+  color: oklch(35% 0.12 37); line-height: 1.45;
+}
+.upload-err.visible { display: block; }
 
 /* ── Toast ───────────────────────────── */
 .toast {
@@ -418,6 +425,7 @@ function buildEditor(item) {
     + '<button class="btn" onclick="triggerFile(\'' + item.slug + '\')">Choose photo</button>'
     + '<input class="url-inp" id="urlinp-' + item.slug + '" type="url" placeholder="…or paste image URL" oninput="previewUrlInput(\'' + item.slug + '\',this.value)">'
     + '</div>'
+    + '<div class="upload-err" id="uploaderr-' + item.slug + '"></div>'
     + '<div class="add-actions">'
     + '<button class="btn btn-primary" id="addbtn-' + item.slug + '" onclick="addPhoto(\'' + item.slug + '\')">Add this photo</button>'
     + '<button class="btn" onclick="closeAddPanel(\'' + item.slug + '\')">Cancel</button>'
@@ -487,18 +495,41 @@ function closeAddPanel(slug) {
 }
 
 // ── Add photo ────────────────────────────────────────────────────
+function showUploadErr(slug, msg) {
+  var el = document.getElementById('uploaderr-' + slug);
+  if (el) { el.textContent = msg; el.classList.add('visible'); }
+  console.error('[Upload error]', msg);
+}
+function clearUploadErr(slug) {
+  var el = document.getElementById('uploaderr-' + slug);
+  if (el) { el.textContent = ''; el.classList.remove('visible'); }
+}
+
 function addPhoto(slug) {
   if (!pendingFile && !pendingUrl) { showToast('Choose a photo first.', true); return; }
   var item = allItems.find(function(i) { return i.slug === slug; });
   if (!item) return;
   if (item.photos.length >= 5) { showToast('Max 5 photos per item.', true); return; }
 
+  clearUploadErr(slug);
   var btn = document.getElementById('addbtn-' + slug);
   btn.disabled = true; btn.textContent = 'Uploading…';
 
   if (pendingFile) {
+    // Guard: Storage must be ready
+    if (!fbStorage) {
+      showUploadErr(slug, 'Firebase Storage not initialized. Refresh the page and try again.');
+      btn.disabled = false; btn.textContent = 'Add this photo'; return;
+    }
+
     var ext = (pendingFile.name.split('.').pop() || 'jpg').toLowerCase().replace('jpeg','jpg');
-    var storageRef = fbStorage.ref('menu-photos/' + slug + '_' + (new Date().getTime()) + '.' + ext);
+    var storageRef;
+    try {
+      storageRef = fbStorage.ref('menu-photos/' + slug + '_' + (new Date().getTime()) + '.' + ext);
+    } catch(refErr) {
+      showUploadErr(slug, 'Could not create storage reference: ' + refErr.message);
+      btn.disabled = false; btn.textContent = 'Add this photo'; return;
+    }
 
     var progBar  = document.getElementById('progress-' + slug);
     var progFill = document.getElementById('progressfill-' + slug);
@@ -511,25 +542,31 @@ function addPhoto(slug) {
 
     function uploadErrorMsg(err) {
       var code = err.code || '';
-      if (code === 'storage/unauthorized')   return 'Firebase Storage rules are blocking uploads. Open Firebase Console → Storage → Rules and make sure writes are allowed.';
-      if (code === 'storage/canceled')       return 'Upload cancelled.';
-      if (code === 'storage/retry-limit-exceeded') return 'Upload timed out. Check your internet connection.';
-      if (code.indexOf('cors') !== -1)       return 'CORS error — see console for details.';
-      return 'Upload failed (' + (code || err.message || 'unknown') + ')';
+      if (code === 'storage/unauthorized')
+        return 'Storage rules are blocking the upload. Go to Firebase Console → Storage → Rules and set: allow read, write: if true;';
+      if (code === 'storage/canceled')
+        return 'Upload was cancelled.';
+      if (code === 'storage/retry-limit-exceeded')
+        return 'Upload timed out — check your internet connection.';
+      if (code === 'storage/unknown' || code === 'storage/server-file-wrong-size')
+        return 'Unknown storage error (code: ' + code + '). This sometimes means the Storage bucket is not set up yet.';
+      if (!code && !err.message)
+        return 'Upload failed with no error details. This is usually a CORS issue — the Storage bucket needs CORS configured for GitHub Pages.';
+      return 'Upload failed — ' + (code ? code + ': ' : '') + (err.message || 'unknown error');
     }
 
     var task;
     try {
       task = storageRef.put(pendingFile);
-    } catch(initErr) {
-      showToast('Storage error: ' + initErr.message, true);
+    } catch(putErr) {
+      showUploadErr(slug, 'Could not start upload: ' + putErr.message);
       resetUploadUI(); return;
     }
 
     // 45-second hard timeout
     var uploadTimer = setTimeout(function() {
       try { task.cancel(); } catch(e) {}
-      showToast('Upload timed out after 45 s. Check Firebase Storage rules and your connection.', true);
+      showUploadErr(slug, 'Upload timed out after 45 seconds. Check Firebase Storage rules and your connection.');
       resetUploadUI();
     }, 45000);
 
@@ -540,7 +577,6 @@ function addPhoto(slug) {
       }
     });
 
-    // Use promise for completion + error (more reliable than on() callbacks)
     task.then(function() {
       return storageRef.getDownloadURL();
     }).then(function(url) {
@@ -554,8 +590,7 @@ function addPhoto(slug) {
       });
     }).catch(function(err) {
       clearTimeout(uploadTimer);
-      showToast(uploadErrorMsg(err), true);
-      console.error('[Storage upload error]', err);
+      showUploadErr(slug, uploadErrorMsg(err));
       resetUploadUI();
     });
 
