@@ -87,9 +87,10 @@ body {
   margin-bottom: var(--space-3);
 }
 
-.logo-wrap svg {
+.logo-wrap img {
   width: 150px;
-  height: auto;
+  height: 150px;
+  object-fit: contain;
   display: block;
 }
 
@@ -408,7 +409,7 @@ body {
 
 /* ─── Responsive ─────────────────────────── */
 @media (min-width: 600px) {
-  .logo-wrap svg { width: 190px; }
+  .logo-wrap img { width: 190px; height: 190px; }
   .site-name { font-size: var(--text-4xl); }
   .menu-content { padding: 0 var(--space-6); }
 }
@@ -429,51 +430,7 @@ body {
 <!-- ── HEADER ───────────────────────────── -->
 <header class="site-header">
   <div class="logo-wrap">
-    <svg viewBox="0 0 200 215" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tahini Plus Halal Kitchen logo">
-      <defs>
-        <pattern id="kef" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-          <rect width="10" height="10" fill="#fdf8f4"/>
-          <path d="M0,5 L5,0 L10,5 L5,10 Z" fill="none" stroke="#c94020" stroke-width="0.9"/>
-          <line x1="5" y1="0" x2="5" y2="10" stroke="#2a1a10" stroke-width="0.3" opacity="0.4"/>
-          <line x1="0" y1="5" x2="10" y2="5" stroke="#2a1a10" stroke-width="0.3" opacity="0.4"/>
-          <circle cx="5" cy="5" r="1" fill="#c94020"/>
-        </pattern>
-        <clipPath id="pc"><circle cx="100" cy="90" r="44"/></clipPath>
-      </defs>
-      <circle cx="100" cy="90" r="82" fill="none" stroke="#7a6030" stroke-width="2"/>
-      <circle cx="100" cy="90" r="77" fill="none" stroke="#7a6030" stroke-width="0.7" stroke-dasharray="4,3" opacity="0.6"/>
-      <circle cx="100" cy="90" r="44" fill="#fdf8f4"/>
-      <circle cx="100" cy="90" r="44" fill="url(#kef)" clip-path="url(#pc)"/>
-      <circle cx="100" cy="90" r="44" fill="none" stroke="#1a1710" stroke-width="2.5"/>
-      <circle cx="100" cy="90" r="36" fill="none" stroke="#1a1710" stroke-width="0.8" opacity="0.5"/>
-      <circle cx="100" cy="90" r="4" fill="#c94020"/>
-      <g transform="translate(34,44)" stroke="#1a1710" stroke-linecap="round" fill="none">
-        <line x1="6" y1="2" x2="5" y2="24" stroke-width="1.8"/>
-        <line x1="10" y1="2" x2="10" y2="24" stroke-width="1.8"/>
-        <line x1="14" y1="2" x2="13" y2="24" stroke-width="1.8"/>
-        <path d="M4.5,24 Q10,29 15,24" stroke-width="1.6"/>
-        <line x1="10" y1="29" x2="10" y2="84" stroke-width="2.5"/>
-        <circle cx="10" cy="84" r="3" fill="#1a1710" stroke="none"/>
-      </g>
-      <g transform="translate(148,44)" stroke="#1a1710" stroke-linecap="round" fill="none">
-        <ellipse cx="8" cy="12" rx="7" ry="10" stroke-width="2"/>
-        <ellipse cx="8" cy="12" rx="4" ry="6.5" stroke-width="0.8" opacity="0.4"/>
-        <line x1="8" y1="22" x2="8" y2="84" stroke-width="2.5"/>
-        <circle cx="8" cy="84" r="3" fill="#1a1710" stroke="none"/>
-      </g>
-      <path d="M62,138 Q74,124 86,134" fill="none" stroke="#3a6625" stroke-width="1.5"/>
-      <ellipse cx="67" cy="131" rx="7" ry="3.5" fill="#3a6625" transform="rotate(-35,67,131)"/>
-      <ellipse cx="75" cy="125" rx="7" ry="3.5" fill="#3a6625" transform="rotate(-15,75,125)"/>
-      <ellipse cx="83" cy="129" rx="6" ry="3" fill="#3a6625" transform="rotate(15,83,129)"/>
-      <path d="M138,138 Q126,124 114,134" fill="none" stroke="#3a6625" stroke-width="1.5"/>
-      <ellipse cx="133" cy="131" rx="7" ry="3.5" fill="#3a6625" transform="rotate(35,133,131)"/>
-      <ellipse cx="125" cy="125" rx="7" ry="3.5" fill="#3a6625" transform="rotate(15,125,125)"/>
-      <ellipse cx="117" cy="129" rx="6" ry="3" fill="#3a6625" transform="rotate(-15,117,129)"/>
-      <circle cx="100" cy="134" r="2.5" fill="#3a6625"/>
-      <text x="100" y="163" font-family="Georgia,'Times New Roman',serif" font-size="24" font-weight="300" fill="#7a6030" text-anchor="middle" letter-spacing="1.5">Tahini</text>
-      <text x="100" y="187" font-family="Georgia,'Times New Roman',serif" font-size="20" font-style="italic" font-weight="400" fill="#9a3820" text-anchor="middle">Plus</text>
-      <text x="100" y="204" font-family="'Arial Narrow',Arial,sans-serif" font-size="8" font-weight="700" fill="#7a7060" text-anchor="middle" letter-spacing="3.5">HALAL KITCHEN</text>
-    </svg>
+    <img src="logo.png" alt="Tahini Plus Halal Kitchen logo">
   </div>
   <h1 class="site-name">Tahini <em>Plus</em></h1>
   <p class="site-tagline">"Tradition Served Beautifully."</p>
