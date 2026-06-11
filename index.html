@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-storage-compat.js"></script>
 <style>
 /* Hallmark · pre-emit critique: P5 H5 E5 S5 R4 V4
    macrostructure: Long Document · tone: warm-artisanal · anchor hue: terracotta+olive
@@ -799,25 +802,24 @@ body {
   outline: none;
 }
 .pe-url:focus { border-color: var(--terracotta); }
-.pe-token-row {
-  display: flex; flex-direction: column; gap: 0.5rem;
-  padding: 0.75rem; background: oklch(97% 0.008 82);
-  border-radius: 8px; border: 1px solid var(--border);
-  font-size: 0.78rem; color: var(--ink-muted);
+.pe-setup-box {
+  display: flex; flex-direction: column; gap: 0.6rem;
+  padding: 0.875rem; background: oklch(97% 0.008 82);
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 0.78rem; color: var(--ink-muted); line-height: 1.5;
 }
-.pe-token-row a { color: var(--terracotta); }
-.pe-token-input {
-  width: 100%;
+.pe-setup-box a { color: var(--terracotta); }
+.pe-setup-title { font-weight: 500; font-size: 0.85rem; color: var(--ink); }
+.pe-setup-steps { padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.pe-setup-steps code { background: var(--border); padding: .1em .3em; border-radius: 3px; font-size:.85em; }
+.pe-config-area {
+  width: 100%; height: 68px; resize: vertical;
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  background: var(--surface);
-  color: var(--ink);
-  outline: none;
+  border: 1px solid var(--border); border-radius: 7px;
+  font-family: monospace; font-size: 0.72rem;
+  background: var(--surface); color: var(--ink); outline: none;
 }
-.pe-token-input:focus { border-color: var(--terracotta); }
+.pe-config-area:focus { border-color: var(--terracotta); }
 .pe-foot {
   display: flex; gap: 0.75rem; justify-content: flex-end;
   padding: 0.75rem 1.25rem 1.25rem;
@@ -1595,76 +1597,96 @@ body {
   }
 })();
 
-/* ── Load food photos from photos.json ── */
-fetch('photos.json').then(function(r){return r.json();}).then(function(map){
-  Object.keys(map).forEach(function(slug){
-    var url = map[slug]; if(!url) return;
-    document.querySelectorAll('.item-photo[data-item="'+slug+'"]').forEach(function(el){
-      el.innerHTML = '<img src="'+url+'" alt="">';
-    });
-  });
-}).catch(function(){/* no photos.json yet — placeholders remain */});
+/* ── Load food photos from Firebase ── */
+(function() {
+  var cfg = JSON.parse(localStorage.getItem('tahini-firebase-config') || 'null');
+  if (!cfg) return;
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    firebase.firestore().collection('menu').doc('photos').get().then(function(doc) {
+      if (!doc.exists) return;
+      var data = doc.data();
+      Object.keys(data).forEach(function(slug) {
+        var url = data[slug]; if (!url) return;
+        document.querySelectorAll('.item-photo[data-item="'+slug+'"]').forEach(function(el) {
+          el.innerHTML = '<img src="'+url+'" alt="" style="width:100%;height:100%;object-fit:cover">';
+        });
+      });
+    }).catch(function(){});
+  } catch(e) {}
+})();
 
-/* ── Inline photo editor ─────────────────── */
+/* ── Photo editor — Firebase ────────────── */
 document.addEventListener('DOMContentLoaded', function() {
 (function() {
-  var REPO   = 'rasheedomar03/tahini-plus-menu';
-  var BRANCH = 'master';
-  var currentSlug  = null;
-  var currentEl    = null;
-  var pendingFile  = null;
-  var pendingUrl   = null;
-  var photosSHA    = null;
-  var photosMap    = {};
+  var FB_KEY   = 'tahini-firebase-config';
+  var fbApp    = null, fbDb = null, fbStorage = null;
+  var currentSlug = null, currentEl = null;
+  var pendingFile = null, pendingUrl  = null;
 
   var overlay    = document.getElementById('pe-overlay');
   var titleEl    = document.getElementById('pe-title');
   var preview    = document.getElementById('pe-preview');
   var fileInput  = document.getElementById('pe-file-input');
-  var chooseBtn  = document.getElementById('pe-choose-btn');
   var urlInput   = document.getElementById('pe-url-input');
-  var tokenRow   = document.getElementById('pe-token-row');
-  var tokenInput = document.getElementById('pe-token-input');
+  var setupBox   = document.getElementById('pe-setup-box');
+  var configArea = document.getElementById('pe-firebase-config');
   var saveBtn    = document.getElementById('pe-save-btn');
   var cancelBtn  = document.getElementById('pe-cancel-btn');
   var closeBtn   = document.getElementById('pe-close');
   var toast      = document.getElementById('pe-toast');
   var toastTimer;
 
-  var token = localStorage.getItem('tahini-gh-token') || '';
-  if (token) { tokenInput.value = token; tokenRow.style.display = 'none'; }
+  function initFb(cfg) {
+    if (fbApp) return true;
+    try {
+      fbApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(cfg);
+      fbDb = firebase.firestore();
+      fbStorage = firebase.storage();
+      return true;
+    } catch(e) { return false; }
+  }
 
+  // Try to init from saved config immediately
+  var saved = JSON.parse(localStorage.getItem(FB_KEY) || 'null');
+  if (saved) initFb(saved);
+
+  // Make all photo placeholders clickable
   document.querySelectorAll('.item-photo').forEach(function(el) {
     el.addEventListener('click', function() { openEditor(el); });
   });
 
   function openEditor(el) {
-    currentEl   = el;
+    currentEl = el;
     currentSlug = el.getAttribute('data-item');
-    pendingFile = null;
-    pendingUrl  = null;
+    pendingFile = null; pendingUrl = null;
     urlInput.value = '';
-    token = localStorage.getItem('tahini-gh-token') || '';
-    tokenInput.value = token;
-    tokenRow.style.display = token ? 'none' : '';
+
     var item = el.closest('.item');
     var nameEl = item ? item.querySelector('.item-name') : null;
-    titleEl.textContent = 'Add Photo' + (nameEl ? ' · ' + nameEl.textContent.trim().slice(0,30) : '');
+    titleEl.textContent = 'Add Photo' + (nameEl ? ' · ' + nameEl.textContent.trim().slice(0, 28) : '');
+
+    var hasCfg = !!localStorage.getItem(FB_KEY);
+    setupBox.style.display = hasCfg ? 'none' : '';
+
     var img = el.querySelector('img');
     if (img) {
-      preview.innerHTML = '<img src="' + img.src + '" alt="" style="width:100%;height:100%;object-fit:cover">';
+      preview.innerHTML = '<img src="'+img.src+'" alt="" style="width:100%;height:100%;object-fit:cover">';
       pendingUrl = img.src;
       urlInput.value = img.src;
     } else {
       resetPreview();
     }
     overlay.classList.add('open');
-    urlInput.focus();
+    if (!hasCfg) { configArea.focus(); } else { urlInput.focus(); }
   }
 
   function resetPreview() {
-    preview.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1rem;cursor:pointer" onclick="document.getElementById(\'pe-file-input\').click()">'
-      + '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c9a98a" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>'
+    preview.innerHTML =
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1rem;cursor:pointer">'
+      + '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c9a98a" stroke-width="1.5">'
+      + '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>'
+      + '<circle cx="12" cy="13" r="4"/></svg>'
       + '<span style="font-size:.8rem;color:var(--ink-muted);text-align:center">Drag &amp; drop or</span>'
       + '<button class="pe-drop-btn" type="button">Choose from device</button>'
       + '</div>';
@@ -1679,18 +1701,20 @@ document.addEventListener('DOMContentLoaded', function() {
   closeBtn.addEventListener('click', closeEditor);
   cancelBtn.addEventListener('click', closeEditor);
   overlay.addEventListener('click', function(e) { if (e.target === overlay) closeEditor(); });
-
-  chooseBtn && chooseBtn.addEventListener('click', function() { fileInput.click(); });
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('pe-drop-btn')) fileInput.click();
-  });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeEditor(); });
 
   fileInput.addEventListener('change', function() {
     var file = fileInput.files[0]; if (!file) return;
     pendingFile = file; pendingUrl = null; urlInput.value = '';
     var r = new FileReader();
-    r.onload = function(e) { preview.innerHTML = '<img src="'+e.target.result+'" alt="" style="width:100%;height:100%;object-fit:cover">'; };
+    r.onload = function(e) {
+      preview.innerHTML = '<img src="'+e.target.result+'" alt="" style="width:100%;height:100%;object-fit:cover">';
+    };
     r.readAsDataURL(file);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('pe-drop-btn')) fileInput.click();
   });
 
   preview.addEventListener('dragover', function(e) { e.preventDefault(); });
@@ -1699,7 +1723,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var file = e.dataTransfer.files[0]; if (!file || !file.type.startsWith('image/')) return;
     pendingFile = file; pendingUrl = null; urlInput.value = '';
     var r = new FileReader();
-    r.onload = function(ev) { preview.innerHTML = '<img src="'+ev.target.result+'" alt="" style="width:100%;height:100%;object-fit:cover">'; };
+    r.onload = function(ev) {
+      preview.innerHTML = '<img src="'+ev.target.result+'" alt="" style="width:100%;height:100%;object-fit:cover">';
+    };
     r.readAsDataURL(file);
   });
 
@@ -1710,81 +1736,70 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!url) { pendingUrl = null; resetPreview(); return; }
     urlTimer = setTimeout(function() {
       var img = new Image();
-      img.onload = function() { pendingUrl = url; pendingFile = null; preview.innerHTML = '<img src="'+url+'" alt="" style="width:100%;height:100%;object-fit:cover">'; };
+      img.onload = function() {
+        pendingUrl = url; pendingFile = null;
+        preview.innerHTML = '<img src="'+url+'" alt="" style="width:100%;height:100%;object-fit:cover">';
+      };
       img.onerror = function() { pendingUrl = null; };
       img.src = url;
     }, 500);
   });
 
   saveBtn.addEventListener('click', function() {
-    token = tokenInput.value.trim() || localStorage.getItem('tahini-gh-token') || '';
-    if (!token) { showToast('Enter your GitHub token first.', true); tokenInput.focus(); return; }
-    localStorage.setItem('tahini-gh-token', token);
-    tokenRow.style.display = 'none';
+    // First-time Firebase setup
+    if (!localStorage.getItem(FB_KEY)) {
+      var raw = (configArea.value || '').trim();
+      if (!raw) { showToast('Paste your Firebase config first.', true); configArea.focus(); return; }
+      var cfg;
+      try {
+        // Accept raw JSON or the full "const firebaseConfig = {...}" form
+        var json = raw.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
+        cfg = JSON.parse(json);
+        if (!cfg.apiKey || !cfg.projectId) throw new Error('missing fields');
+      } catch(e) {
+        showToast('Invalid config — paste just the { ... } object.', true); return;
+      }
+      if (!initFb(cfg)) { showToast('Could not connect to Firebase.', true); return; }
+      localStorage.setItem(FB_KEY, JSON.stringify(cfg));
+      setupBox.style.display = 'none';
+      showToast('Connected to Firebase!');
+    }
+
     if (!pendingFile && !pendingUrl) { showToast('Add a photo first.', true); return; }
-    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
-    if (pendingFile) { saveFile(pendingFile); } else { saveUrl(pendingUrl); }
+    saveBtn.disabled = true; saveBtn.textContent = 'Uploading…';
+    if (pendingFile) { uploadFile(pendingFile); } else { saveUrl(pendingUrl); }
   });
 
-  function saveFile(file) {
-    var r = new FileReader();
-    r.onload = function(e) {
-      var b64  = e.target.result.split(',')[1];
-      var ext  = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      var path = 'images/' + currentSlug + '.' + ext;
-      ghFetch('https://api.github.com/repos/'+REPO+'/contents/'+path, {})
-        .then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(existing) {
-          var body = { message: 'Add photo: '+currentSlug, content: b64, branch: BRANCH };
-          if (existing && existing.sha) body.sha = existing.sha;
-          return ghFetch('https://api.github.com/repos/'+REPO+'/contents/'+path,
-            { method:'PUT', body: JSON.stringify(body) });
-        })
-        .then(function(res) { if (!res.ok) return res.json().then(function(e){ throw new Error(e.message); }); })
-        .then(function() { return saveUrl(path); })
-        .catch(function(e) { showToast(e.message, true); resetSaveBtn(); });
-    };
-    r.readAsDataURL(file);
+  function uploadFile(file) {
+    var ext  = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/jpeg/, 'jpg');
+    var ref  = fbStorage.ref('menu-photos/' + currentSlug + '.' + ext);
+    ref.put(file)
+      .then(function() { return ref.getDownloadURL(); })
+      .then(function(url) { return saveUrl(url); })
+      .catch(function(e) { showToast(e.message || 'Upload failed.', true); resetBtn(); });
   }
 
   function saveUrl(url) {
-    return ghFetch('https://api.github.com/repos/'+REPO+'/contents/photos.json?ref='+BRANCH, {})
-      .then(function(r){ return r.json(); })
-      .then(function(data) {
-        photosSHA = data.sha;
-        try { photosMap = JSON.parse(atob(data.content.replace(/\n/g,''))); } catch(e){ photosMap = {}; }
-        photosMap[currentSlug] = url;
-        var body = { message:'Update photo: '+currentSlug, content: btoa(JSON.stringify(photosMap,null,2)), sha: photosSHA, branch: BRANCH };
-        return ghFetch('https://api.github.com/repos/'+REPO+'/contents/photos.json',
-          { method:'PUT', body: JSON.stringify(body) });
-      })
-      .then(function(r){ if (!r.ok) return r.json().then(function(e){ throw new Error(e.message); }); return r.json(); })
-      .then(function(data) {
-        photosSHA = data.content.sha;
+    var update = {};
+    update[currentSlug] = url;
+    return fbDb.collection('menu').doc('photos').set(update, { merge: true })
+      .then(function() {
         currentEl.innerHTML = '<img src="'+url+'" alt="" style="width:100%;height:100%;object-fit:cover">';
-        showToast('Saved! Live on menu in ~30 seconds.');
+        showToast('Photo saved — live for everyone now!');
         closeEditor();
+        resetBtn();
       })
-      .catch(function(e){ showToast(e.message, true); })
-      .then(function(){ resetSaveBtn(); });
+      .catch(function(e) { showToast(e.message || 'Save failed.', true); resetBtn(); });
   }
 
-  function ghFetch(url, opts) {
-    var headers = { Authorization: 'token '+token, Accept: 'application/vnd.github+json' };
-    if (opts.body) headers['Content-Type'] = 'application/json';
-    return fetch(url, Object.assign({ headers: headers }, opts));
-  }
-
-  function resetSaveBtn() { saveBtn.disabled = false; saveBtn.textContent = 'Save to Menu'; }
+  function resetBtn() { saveBtn.disabled = false; saveBtn.textContent = 'Save to Menu'; }
 
   function showToast(msg, isErr) {
     toast.textContent = msg;
-    toast.className = 'pe-toast'+(isErr?' err':'')+' show';
+    toast.className = 'pe-toast' + (isErr ? ' err' : '') + ' show';
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ toast.className='pe-toast'; }, 4000);
+    toastTimer = setTimeout(function() { toast.className = 'pe-toast'; }, 4000);
   }
-
-  document.addEventListener('keydown', function(e){ if (e.key==='Escape') closeEditor(); });
 })();
 }); // DOMContentLoaded
 </script>
@@ -1810,9 +1825,15 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <div class="pe-or">or paste a URL</div>
       <input class="pe-url" id="pe-url-input" type="url" placeholder="https://i.imgur.com/example.jpg">
-      <div class="pe-token-row" id="pe-token-row">
-        <span>GitHub token needed to save &mdash; <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">get one here</a> (Fine-grained, Contents: Read &amp; Write on this repo).</span>
-        <input class="pe-token-input" id="pe-token-input" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      <div class="pe-setup-box" id="pe-setup-box">
+        <div class="pe-setup-title">One-time Firebase Setup</div>
+        <ol class="pe-setup-steps">
+          <li>Create a free project at <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a></li>
+          <li>Add a <strong>Web app</strong> &rarr; copy the <code>firebaseConfig</code> object</li>
+          <li>Enable <strong>Firestore Database</strong> and <strong>Storage</strong></li>
+          <li>Set both rules to: <code>allow read, write: if true;</code></li>
+        </ol>
+        <textarea id="pe-firebase-config" class="pe-config-area" placeholder='{"apiKey":"AIza...","projectId":"your-app","storageBucket":"your-app.appspot.com",...}'></textarea>
       </div>
     </div>
     <div class="pe-foot">
