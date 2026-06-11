@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,8 +35,6 @@
     width: 100%;
   }
 
-  .logo-area { text-align: center; }
-
   .brand {
     font-family: 'Fraunces', Georgia, serif;
     font-size: 1.75rem;
@@ -45,6 +42,7 @@
     color: oklch(20% 0.01 75);
     letter-spacing: -0.01em;
     line-height: 1;
+    text-align: center;
   }
   .brand em { font-style: italic; color: oklch(53% 0.108 37); }
 
@@ -52,7 +50,8 @@
     font-size: 0.72rem;
     color: oklch(50% 0.01 75);
     letter-spacing: 0.04em;
-    margin-top: 0.35rem;
+    text-align: center;
+    margin-top: 0.1rem;
   }
 
   .qr-wrap {
@@ -60,16 +59,18 @@
     border-radius: 14px;
     padding: 1rem;
     border: 1px solid oklch(90% 0.008 82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  #qr-canvas canvas { display: block; border-radius: 6px; }
+  #qr-canvas img, #qr-canvas canvas { display: block; border-radius: 4px; }
 
   .cta {
     font-size: 0.875rem;
     font-weight: 500;
     color: oklch(30% 0.008 75);
     text-align: center;
-    line-height: 1.4;
   }
 
   .url {
@@ -128,9 +129,9 @@
 <body>
 
 <div class="card">
-  <div class="logo-area">
+  <div>
     <div class="brand">Tahini <em>Plus</em></div>
-    <div class="tagline">Halal Kitchen · Houston, TX</div>
+    <div class="tagline">Halal Kitchen &middot; Houston, TX</div>
   </div>
 
   <div class="divider"></div>
@@ -148,13 +149,43 @@
 <p class="hint">Print one per table, or save as PDF to send to your printer.</p>
 
 <script>
-  QRCode.toCanvas(document.createElement('canvas'),
-    'https://rasheedomar03.github.io/tahini-plus-menu/',
-    { width: 200, margin: 1, color: { dark: '#281f1a', light: '#ffffff' } },
-    function(err, canvas) {
-      if (!err) document.getElementById('qr-canvas').appendChild(canvas);
-    }
-  );
+var MENU_URL = 'https://rasheedomar03.github.io/tahini-plus-menu/';
+
+// Inline tiny QR code renderer — no external JS needed
+// Uses the QR Server public API as an <img> with a canvas fallback
+(function() {
+  var wrap = document.getElementById('qr-canvas');
+
+  // Option A: render via QR Server API (works if online)
+  var img = document.createElement('img');
+  img.width  = 200;
+  img.height = 200;
+  img.alt    = 'QR Code';
+  img.style.borderRadius = '4px';
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/'
+    + '?size=200x200'
+    + '&data=' + encodeURIComponent(MENU_URL)
+    + '&color=281f1a'
+    + '&bgcolor=ffffff'
+    + '&margin=2';
+
+  img.onerror = function() {
+    // Option B: try goqr.me as backup
+    var img2 = document.createElement('img');
+    img2.width  = 200;
+    img2.height = 200;
+    img2.alt    = 'QR Code';
+    img2.style.borderRadius = '4px';
+    img2.src = 'https://quickchart.io/qr?text=' + encodeURIComponent(MENU_URL) + '&size=200';
+    img2.onerror = function() {
+      wrap.innerHTML = '<p style="font-size:.75rem;color:#888;text-align:center;width:200px">Could not load QR code.<br>Visit the URL below to use the menu.</p>';
+    };
+    wrap.innerHTML = '';
+    wrap.appendChild(img2);
+  };
+
+  wrap.appendChild(img);
+})();
 </script>
 </body>
 </html>
