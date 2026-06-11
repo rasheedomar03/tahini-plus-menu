@@ -407,6 +407,52 @@ body {
   font-size: var(--text-sm);
 }
 
+/* ─── Item photo placeholder ────────────── */
+.item-photo {
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  align-self: center;
+  border-radius: var(--radius-md);
+  background: oklch(95% 0.012 37);
+  border: 1.5px dashed oklch(80% 0.028 37);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  order: 2;
+}
+
+/* Camera icon shown when no image is present */
+.item-photo::before {
+  content: "";
+  width: 30px;
+  height: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b8937a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z'/%3E%3Ccircle cx='12' cy='13' r='4'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.55;
+  display: block;
+}
+
+/* When a real <img> is inside, hide the camera placeholder */
+.item-photo:has(img)::before { display: none; }
+
+/* Real food photo */
+.item-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius-md);
+}
+
+/* Price sits last (after photo) on the right */
+.item-price { order: 3; }
+.size-row    { order: 3; }
+
 /* ─── Bestseller tag ─────────────────────── */
 .best-tag {
   display: inline-block;
@@ -721,6 +767,24 @@ body {
 <!-- ── MENU ─────────────────────────────── -->
 <main class="menu-content">
 
+<!-- ═══════════════════════════════════════════════════════════════
+  HOW TO ADD FOOD PHOTOS — Instructions for Restaurant Owners
+  ─────────────────────────────────────────────────────────────────
+  1. Create a folder called "images" in the same folder as this file
+  2. Upload your food photo (JPG or PNG) into that "images" folder
+  3. Find the menu item you want — search for the item name,
+     then look just below it for:   <div class="item-photo"></div>
+  4. Replace that line with:
+         <div class="item-photo"><img src="images/YOUR-PHOTO.jpg" alt="Item Name"></div>
+  5. Save the file and re-upload to GitHub
+
+  EXAMPLE — adding a photo for Hummus:
+    BEFORE:  <div class="item-photo"></div>
+    AFTER:   <div class="item-photo"><img src="images/hummus.jpg" alt="Hummus"></div>
+
+  TIP: Name your files clearly — hummus.jpg, falafel.jpg, makloubeh.jpg, etc.
+═══════════════════════════════════════════════════════════════ -->
+
   <!-- ── APPETIZERS & BREAKFAST ─────────── -->
   <section class="menu-section" id="appetizers">
     <div class="section-header">
@@ -734,6 +798,7 @@ body {
         <h3 class="item-name">Mixed Appetizer 1</h3>
         <p class="item-desc">French fries, 3 falafel, 2 spring rolls, 2 grape leaves, 1 kibbeh, 1 pita bread.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$14.99</div>
     </div>
 
@@ -742,6 +807,7 @@ body {
         <h3 class="item-name">Mixed Appetizer 2</h3>
         <p class="item-desc">Hummus, labneh, muhammara, mutabal, and 2 pita breads.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$14.99</div>
     </div>
 
@@ -750,6 +816,7 @@ body {
         <h3 class="item-name">Mixed Pickles</h3>
         <p class="item-desc">A zesty blend of pickled vegetables in house brine.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$4.99</div>
     </div>
 
@@ -758,6 +825,7 @@ body {
         <h3 class="item-name">Kibbeh <span class="item-detail">(Fried, 2 pcs)</span></h3>
         <p class="item-desc">Golden bulgur shells filled with spiced beef and onions.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$6.99</div>
     </div>
 
@@ -766,6 +834,7 @@ body {
         <h3 class="item-name">Kibbeh Sajiya <span class="item-detail">(2 pcs)</span></h3>
         <p class="item-desc">Pan-seared kibbeh with walnut, chargrilled for a smoky aroma.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
 
@@ -774,6 +843,7 @@ body {
         <h3 class="item-name">Kibbeh Tray <span class="item-detail">(Grilled)</span></h3>
         <p class="item-desc">Layers of bulgur and seasoned beef baked with pine nuts.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
 
@@ -782,6 +852,7 @@ body {
         <h3 class="item-name">Kibbeh with Laban <span class="item-detail">(4 pcs)</span></h3>
         <p class="item-desc">Served in warm yogurt sauce with garlic and cilantro.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$13.99</div>
     </div>
 
@@ -791,6 +862,7 @@ body {
         <p class="item-desc">Classic chickpea dip with tahini, lemon, and garlic.</p>
         <p class="item-addons">Add-ons: Ground Beef, Beef Cubes, or Shawarma (Beef/Chicken) +$4.99</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Sm $6.99</span><span>Lg $9.99</span></div></div>
     </div>
 
@@ -799,6 +871,7 @@ body {
         <h3 class="item-name">Foul <span class="item-detail">(Fūl Medames)</span></h3>
         <p class="item-desc">Warm fava beans with olive oil, lemon, and garlic.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Sm $6.99</span><span>Lg $9.99</span></div></div>
     </div>
 
@@ -807,6 +880,7 @@ body {
         <h3 class="item-name">Mussabaha</h3>
         <p class="item-desc">Whole chickpeas mixed with creamy tahini and lemon.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Sm $7.99</span><span>Lg $10.99</span></div></div>
     </div>
 
@@ -815,6 +889,7 @@ body {
         <h3 class="item-name">Kodsiah</h3>
         <p class="item-desc">A blend of hummus and fava beans — smooth and hearty.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Sm $7.99</span><span>Lg $10.99</span></div></div>
     </div>
 
@@ -823,6 +898,7 @@ body {
         <h3 class="item-name">Mutabal</h3>
         <p class="item-desc">Smoky roasted eggplant blended with tahini, lemon, and garlic.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Sm $8.99</span><span>Lg $12.99</span></div></div>
     </div>
 
@@ -831,6 +907,7 @@ body {
         <h3 class="item-name">Muhammara</h3>
         <p class="item-desc">Walnut and roasted red pepper spread with pomegranate molasses.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Sm $8.99</span><span>Lg $12.99</span></div></div>
     </div>
 
@@ -839,6 +916,7 @@ body {
         <h3 class="item-name">Labneh</h3>
         <p class="item-desc">Thick, creamy yogurt with olive oil and mint.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Sm $7.99</span><span>Lg $10.99</span></div></div>
     </div>
 
@@ -850,6 +928,7 @@ body {
         <p class="item-desc">Sautéed tomatoes with herbs.</p>
         <p class="item-addons">+$4.99 for Beef or Beef Cubes</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$9.99</div>
     </div>
 
@@ -859,6 +938,7 @@ body {
         <p class="item-desc">Eggs poached in spiced tomato, herbs, and garlic.</p>
         <p class="item-addons">+$4.99 for Beef or Beef Cubes</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
 
@@ -867,6 +947,7 @@ body {
         <h3 class="item-name">Fried Eggs</h3>
         <p class="item-desc">Sunny-side up, scrambled, or herb omelet.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$9.99</div>
     </div>
 
@@ -875,6 +956,7 @@ body {
         <h3 class="item-name">Ejjeh <span class="item-detail">(2 eggs)</span></h3>
         <p class="item-desc">A herb-loaded savory omelette.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
 
@@ -883,6 +965,7 @@ body {
         <h3 class="item-name">Mufarakeh</h3>
         <p class="item-desc">Scrambled eggs and fried potatoes garnished with parsley.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$9.99</div>
     </div>
 
@@ -891,6 +974,7 @@ body {
         <h3 class="item-name">Chicken Liver</h3>
         <p class="item-desc">Sautéed with onions, garlic, and pomegranate molasses.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
 
@@ -899,6 +983,7 @@ body {
         <h3 class="item-name">Fried Halloumi</h3>
         <p class="item-desc">Crispy outside, soft inside — a Mediterranean favorite.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
 
@@ -907,6 +992,7 @@ body {
         <h3 class="item-name">Sambousek — Meat <span class="item-detail">(4 pcs)</span></h3>
         <p class="item-desc">Crispy pastry filled with seasoned ground beef.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$8.99</div>
     </div>
 
@@ -915,6 +1001,7 @@ body {
         <h3 class="item-name">Sambousek — Cheese <span class="item-detail">(4 pcs)</span></h3>
         <p class="item-desc">Flaky pastry with melted cheese and parsley filling.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$7.99</div>
     </div>
 
@@ -923,6 +1010,7 @@ body {
         <h3 class="item-name">French Fries</h3>
         <p class="item-desc">Crispy, golden perfection.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$4.99</div>
     </div>
 
@@ -932,6 +1020,7 @@ body {
         <p class="item-desc">Topped with cheese, sauces, and your choice of meat.</p>
         <p class="item-addons">+$4.99: Chicken Cubes, Beef Cubes, or Shawarma</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
 
@@ -940,6 +1029,7 @@ body {
         <h3 class="item-name">Yalanji <span class="item-detail">(5 pcs)</span></h3>
         <p class="item-desc">Vegetarian grape leaves filled with rice, tomato, herbs, and olive oil.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$5.99</div>
     </div>
   </section>
@@ -953,14 +1043,17 @@ body {
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Lentil Soup</h3><p class="item-desc">Pureed lentils with cumin and lemon.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$5.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Mushroom Soup</h3><p class="item-desc">Creamy with thyme and sautéed mushrooms.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$5.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Tomato Basil Soup</h3><p class="item-desc">Roasted tomatoes with fresh basil.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$5.99</div>
     </div>
   </section>
@@ -974,34 +1067,42 @@ body {
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Caesar Salad</h3><p class="item-desc">Romaine, parmesan, croutons.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$7.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Fattoush</h3><p class="item-desc">Crunchy vegetables with pomegranate dressing.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$7.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Tabbouleh</h3><p class="item-desc">Parsley, tomato, onion, bulgur, lemon.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$7.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Greek Salad</h3><p class="item-desc">Tomato, cucumber, feta, olives.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$7.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Yogurt Cucumber Salad</h3><p class="item-desc">Yogurt with cucumber, garlic, mint.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$7.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Green Salad</h3><p class="item-desc">Mixed greens, choice of dressing.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$7.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Chef's Special Salad</h3><p class="item-desc">Large mixed greens, nuts, honey, and chef's special dressing.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$13.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Special Fattoush</h3><p class="item-desc">Large fattoush salad inside puffy pita bread.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
   </section>
@@ -1019,14 +1120,17 @@ body {
         <p class="item-desc">Crispy pita, creamy hummus, chickpeas, butter &amp; pine nuts.</p>
         <p class="item-addons">Add ground beef or shawarma +$4.99</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Yalanji Fattah</h3><p class="item-desc">Vine leaves over yogurt sauce &amp; toasted bread.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$6.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Makdous Fattah</h3><p class="item-desc">Eggplant makdous with garlic-buttered bread and Badweh sauce.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$9.99</div>
     </div>
   </section>
@@ -1045,54 +1149,67 @@ body {
         <p class="item-desc">Falafel with lettuce, tomato, pickles, and tahini.</p>
         <p class="item-addons">+Hummus $1 | +Maqali $4 | +Fries $3.99</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$8.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Sujuk Sandwich</h3><p class="item-desc">Spicy Lebanese sausage with pickles &amp; garlic sauce.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$7.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Beef Shawarma Sandwich</h3><p class="item-desc">Tender marinated shawarma wrapped with pickles &amp; veggies.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$10.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Chicken Shawarma Sandwich</h3><p class="item-desc">Juicy marinated chicken shawarma wrap.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$9.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Special Shawarma</h3><p class="item-desc">Blend of chicken &amp; beef with house sauces.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$12.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Philly Cheesesteak</h3><p class="item-desc">Grilled beef with onions, peppers &amp; cheese.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$11.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Cheeseburger</h3><p class="item-desc">Beef patty with cheese, lettuce, tomato, pickles.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$8.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Chicken Sandwich</h3><p class="item-desc">Crispy chicken fillet with veggies.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$8.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Gyro Sandwich</h3><p class="item-desc">Seasoned beef &amp; lamb with tzatziki.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$9.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Kufta Kebab Sandwich</h3><p class="item-desc">Ground beef kebab with herbs &amp; vegetables.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$10.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Shish Tawook Sandwich</h3><p class="item-desc">Grilled chicken cubes with garlic sauce &amp; pickles.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$10.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Veggie Burger</h3><p class="item-desc">Plant-based patty with lettuce, tomato, and sauce.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$8.99</div>
     </div>
     <div class="item">
       <div class="item-main"><h3 class="item-name">Hot Dog</h3><p class="item-desc">Classic grilled beef frank with condiments.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$5.99</div>
     </div>
 
@@ -1102,6 +1219,7 @@ body {
         <h3 class="item-name">Special Wrap</h3>
         <p class="item-desc">Your choice of kufta kebab, chicken tawook, or beef skewers — chargrilled with grilled vegetables, wrapped in dough, baked to perfection with sesame and black seed.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$14.99</div>
     </div>
   </section>
@@ -1147,6 +1265,7 @@ body {
         <h3 class="item-name">Makloubeh</h3>
         <p class="item-desc">A celebrated Palestinian dish — layered rice, meat, and vegetables slow-cooked and dramatically flipped onto a serving platter.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Chkn $34.99</span><span>Lamb $44.99</span></div></div>
     </div>
 
@@ -1156,6 +1275,7 @@ body {
         <h3 class="item-name">Qidreh</h3>
         <p class="item-desc">From the city of Hebron: spiced meat, fragrant rice, garlic, and chickpeas slow-cooked in a heavy pot.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Chkn $34.99</span><span>Lamb $44.99</span></div></div>
     </div>
 
@@ -1165,46 +1285,55 @@ body {
         <p class="item-desc">Lamb in creamy yogurt sauce over rice with Shrak bread.</p>
         <p class="item-addons">+Extra Meat $9.99</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$19.99</div>
     </div>
 
     <div class="item">
       <div class="item-main"><h3 class="item-name">Musakhan</h3><p class="item-desc">½ Chicken baked with caramelized onions, sumac &amp; olive oil on taboon bread.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$17.99</div>
     </div>
 
     <div class="item">
       <div class="item-main"><h3 class="item-name">Kufta</h3><p class="item-desc">Spiced ground beef or lamb, grilled or baked, with rice &amp; salad.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$17.99</div>
     </div>
 
     <div class="item">
       <div class="item-main"><h3 class="item-name">Shushbarak <span class="item-detail">(10 pcs)</span></h3><p class="item-desc">Beef dumplings in garlicky yogurt sauce.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$19.99</div>
     </div>
 
     <div class="item">
       <div class="item-main"><h3 class="item-name">Gyro Platter</h3><p class="item-desc">Beef &amp; lamb with rice, salad, &amp; tzatziki.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$13.99</div>
     </div>
 
     <div class="item">
       <div class="item-main"><h3 class="item-name">Shawarma Platter</h3><p class="item-desc">Choice of beef or chicken; served with rice &amp; salad.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>Chkn $13.99</span><span>Beef $14.99</span></div></div>
     </div>
 
     <div class="item">
       <div class="item-main"><h3 class="item-name">Chargrilled Chicken</h3><p class="item-desc">Mediterranean spiced, served with rice &amp; salad.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price"><div class="size-row"><span>½ $14.99</span><span>Whole $23.99</span></div></div>
     </div>
 
     <div class="item">
       <div class="item-main"><h3 class="item-name">Lamb Shank</h3><p class="item-desc">Slow-cooked lamb over seasoned rice.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$22.99</div>
     </div>
 
     <div class="item">
       <div class="item-main"><h3 class="item-name">Chargrilled Fish</h3><p class="item-desc">Whole fish marinated in Mediterranean spices.</p></div>
+      <div class="item-photo"></div>
       <div class="item-price">$24.99</div>
     </div>
   </section>
@@ -1223,6 +1352,7 @@ body {
         <p class="item-desc">Two skewers of your choice with rice &amp; salad.</p>
         <p class="item-addons">Choose any 2 (chicken or kufta; +$1 for meat skewer)</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$17.99</div>
     </div>
 
@@ -1233,6 +1363,7 @@ body {
         <p class="item-desc">2 Chicken, 2 Kufta, 2 Meat skewers with rice &amp; salad.</p>
         <p class="item-addons">+$1 upgrade per skewer to replace chicken or kufta</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$49.99</div>
     </div>
 
@@ -1242,6 +1373,7 @@ body {
         <h3 class="item-name">Tahini Family Mixed Grill</h3>
         <p class="item-desc">3 Chicken, 3 Kufta, 3 Meat, 3 Lamb Chops — rice &amp; salad, 2 large dips of your choice, 4 pita breads.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$109.99</div>
     </div>
 
@@ -1250,6 +1382,7 @@ body {
         <h3 class="item-name">Lamb Chop Platter</h3>
         <p class="item-desc">Bone-in (3 pcs) or boneless (4 pcs) with rice &amp; salad.</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$24.99</div>
     </div>
 
@@ -1315,6 +1448,7 @@ body {
         <p class="item-desc">Chicken with onions &amp; sumac, baked in thin bread.</p>
         <p class="item-addons">Minimum 10 pieces</p>
       </div>
+      <div class="item-photo"></div>
       <div class="item-price">$5.99 ea</div>
     </div>
     <div class="item"><div class="item-main"><h3 class="item-name">Grilled Lamb Shoulder over Rice</h3><p class="item-desc">With salad.</p></div><div class="item-price">$99</div></div>
