@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f5efe6">
+<title>Tahini Plus · Halal Kitchen Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R4 V4
+   macrostructure: Long Document · tone: warm-artisanal · anchor hue: terracotta+olive
+   theme: custom · vibe: "Mediterranean warmth, halal kitchen, Palestinian tradition"
+   paper oklch(97% 0.008 82) · accent oklch(53% 0.108 37) terracotta
+   Fraunces + Outfit · light / display-serif / warm */
+
+/* ─── Tokens ─────────────────────────────── */
+:root {
+  --canvas:        oklch(97% 0.008 82);
+  --surface:       oklch(99.5% 0.003 82);
+  --surface-alt:   oklch(95% 0.014 82);
+  --ink:           oklch(20% 0.006 75);
+  --ink-muted:     oklch(50% 0.01 75);
+  --ink-subtle:    oklch(68% 0.008 75);
+  --olive:         oklch(45% 0.065 82);
+  --terracotta:    oklch(53% 0.108 37);
+  --accent:        var(--terracotta);
+  --border:        oklch(88% 0.01 82);
+  --border-strong: oklch(80% 0.018 82);
+  --halal-bg:      oklch(97% 0.018 145);
+  --halal-text:    oklch(36% 0.1 145);
+  --halal-border:  oklch(84% 0.042 140);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Outfit', system-ui, sans-serif;
+
+  --text-xs:   0.6875rem;
+  --text-sm:   0.8125rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.5rem;
+
+  --space-1: 0.25rem;  --space-2: 0.5rem;
+  --space-3: 0.75rem;  --space-4: 1rem;
+  --space-5: 1.25rem;  --space-6: 1.5rem;
+  --space-8: 2rem;     --space-10: 2.5rem;
+  --space-12: 3rem;    --space-16: 4rem;
+
+  --radius-sm:   0.375rem;
+  --radius-md:   0.75rem;
+  --radius-full: 9999px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+}
+
+/* ─── Reset ──────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; overflow-x: clip; }
+html, body { overflow-x: clip; }
+
+/* ─── Base ───────────────────────────────── */
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Header ─────────────────────────────── */
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  text-align: center;
+}
+
+.logo-wrap {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+}
+
+.logo-wrap svg {
+  width: 150px;
+  height: auto;
+  display: block;
+}
+
+.site-name {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 300;
+  color: var(--olive);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: var(--space-1);
+}
+
+.site-name em {
+  color: var(--terracotta);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.site-tagline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-base);
+  color: var(--ink-muted);
+  margin-bottom: var(--space-3);
+}
+
+.site-desc {
+  font-size: var(--text-sm);
+  color: var(--ink-subtle);
+  max-width: 52ch;
+  margin: 0 auto var(--space-4);
+  line-height: 1.55;
+}
+
+.halal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--halal-bg);
+  color: var(--halal-text);
+  border: 1px solid var(--halal-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.halal-badge::before { content: "✦"; color: oklch(48% 0.12 145); }
+
+/* ─── Sticky Category Nav ────────────────── */
+.cat-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.cat-nav::-webkit-scrollbar { display: none; }
+
+.cat-nav-inner {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  width: max-content;
+}
+
+.cat-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+  text-decoration: none;
+  min-height: 44px;
+}
+
+.cat-btn:hover { background: var(--surface-alt); color: var(--ink); border-color: var(--border-strong); }
+
+.cat-btn.active {
+  background: var(--terracotta);
+  color: oklch(98% 0.004 37);
+  border-color: var(--terracotta);
+}
+
+.cat-btn:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+/* ─── Menu Content ───────────────────────── */
+.menu-content {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+/* ─── Menu Section ───────────────────────── */
+.menu-section {
+  padding: var(--space-10) 0 var(--space-6);
+  scroll-margin-top: 58px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid var(--border);
+}
+
+.section-icon { font-size: var(--text-2xl); line-height: 1; flex-shrink: 0; }
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  color: var(--olive);
+  letter-spacing: -0.01em;
+}
+
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border-strong), transparent);
+}
+
+/* ─── Menu Items ─────────────────────────── */
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.item:last-of-type { border-bottom: none; }
+
+.item:hover { background: oklch(97.5% 0.006 82); }
+
+.item-main { flex: 1; min-width: 0; }
+
+.item-name {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  margin-bottom: var(--space-1);
+}
+
+.item-detail { font-weight: 400; color: var(--ink-muted); font-size: var(--text-sm); }
+
+.item-desc {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  line-height: 1.5;
+  max-width: 55ch;
+}
+
+.item-addons {
+  font-size: var(--text-xs);
+  color: var(--ink-subtle);
+  margin-top: var(--space-1);
+  font-style: italic;
+}
+
+.item-price {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--terracotta);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 0.1rem;
+  min-width: 4.5rem;
+  text-align: right;
+}
+
+.size-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+/* ─── Signature items ────────────────────── */
+.item.signature {
+  background: var(--surface-alt);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.item.signature:hover { background: oklch(94% 0.018 82); }
+
+.sig-badge {
+  display: inline-block;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-bottom: var(--space-1);
+}
+
+/* ─── Subsection labels ──────────────────── */
+.sub-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-subtle);
+  margin: var(--space-6) 0 var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ─── Notice ─────────────────────────────── */
+.notice {
+  background: var(--surface-alt);
+  border-left: 3px solid var(--terracotta);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-3) 0;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ─── Build-Your-Own grid ────────────────── */
+.build-own {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  margin: var(--space-5) 0;
+}
+
+.build-own h3 {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--olive);
+  margin-bottom: var(--space-2);
+}
+
+.build-sub {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  margin-bottom: var(--space-4);
+}
+
+.build-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+}
+
+.build-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-1);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+.build-row:nth-last-child(-n+2) { border-bottom: none; }
+.build-name { font-weight: 500; color: var(--ink); }
+.build-price { color: var(--terracotta); font-weight: 600; }
+
+/* ─── Footer ─────────────────────────────── */
+.site-footer {
+  background: oklch(24% 0.01 75);
+  color: oklch(68% 0.008 75);
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+  margin-top: var(--space-16);
+}
+
+.footer-name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 300;
+  color: oklch(92% 0.012 82);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-1);
+}
+
+.footer-name em { color: var(--terracotta); font-style: italic; }
+.footer-tagline { font-family: var(--font-display); font-style: italic; font-size: var(--text-sm); color: oklch(58% 0.01 75); margin-bottom: var(--space-5); }
+.footer-info { font-size: var(--text-sm); line-height: 1.9; }
+.footer-note { margin-top: var(--space-6); font-size: var(--text-xs); color: oklch(44% 0.008 75); letter-spacing: 0.04em; }
+
+/* ─── Responsive ─────────────────────────── */
+@media (min-width: 600px) {
+  .logo-wrap svg { width: 190px; }
+  .site-name { font-size: var(--text-4xl); }
+  .menu-content { padding: 0 var(--space-6); }
+}
+
+@media (max-width: 360px) {
+  .site-name { font-size: var(--text-2xl); }
+  .item-price { min-width: 3.5rem; font-size: var(--text-sm); }
+  .build-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ───────────────────────────── -->
+<header class="site-header">
+  <div class="logo-wrap">
+    <svg viewBox="0 0 200 215" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tahini Plus Halal Kitchen logo">
+      <defs>
+        <pattern id="kef" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+          <rect width="10" height="10" fill="#fdf8f4"/>
+          <path d="M0,5 L5,0 L10,5 L5,10 Z" fill="none" stroke="#c94020" stroke-width="0.9"/>
+          <line x1="5" y1="0" x2="5" y2="10" stroke="#2a1a10" stroke-width="0.3" opacity="0.4"/>
+          <line x1="0" y1="5" x2="10" y2="5" stroke="#2a1a10" stroke-width="0.3" opacity="0.4"/>
+          <circle cx="5" cy="5" r="1" fill="#c94020"/>
+        </pattern>
+        <clipPath id="pc"><circle cx="100" cy="90" r="44"/></clipPath>
+      </defs>
+      <circle cx="100" cy="90" r="82" fill="none" stroke="#7a6030" stroke-width="2"/>
+      <circle cx="100" cy="90" r="77" fill="none" stroke="#7a6030" stroke-width="0.7" stroke-dasharray="4,3" opacity="0.6"/>
+      <circle cx="100" cy="90" r="44" fill="#fdf8f4"/>
+      <circle cx="100" cy="90" r="44" fill="url(#kef)" clip-path="url(#pc)"/>
+      <circle cx="100" cy="90" r="44" fill="none" stroke="#1a1710" stroke-width="2.5"/>
+      <circle cx="100" cy="90" r="36" fill="none" stroke="#1a1710" stroke-width="0.8" opacity="0.5"/>
+      <circle cx="100" cy="90" r="4" fill="#c94020"/>
+      <g transform="translate(34,44)" stroke="#1a1710" stroke-linecap="round" fill="none">
+        <line x1="6" y1="2" x2="5" y2="24" stroke-width="1.8"/>
+        <line x1="10" y1="2" x2="10" y2="24" stroke-width="1.8"/>
+        <line x1="14" y1="2" x2="13" y2="24" stroke-width="1.8"/>
+        <path d="M4.5,24 Q10,29 15,24" stroke-width="1.6"/>
+        <line x1="10" y1="29" x2="10" y2="84" stroke-width="2.5"/>
+        <circle cx="10" cy="84" r="3" fill="#1a1710" stroke="none"/>
+      </g>
+      <g transform="translate(148,44)" stroke="#1a1710" stroke-linecap="round" fill="none">
+        <ellipse cx="8" cy="12" rx="7" ry="10" stroke-width="2"/>
+        <ellipse cx="8" cy="12" rx="4" ry="6.5" stroke-width="0.8" opacity="0.4"/>
+        <line x1="8" y1="22" x2="8" y2="84" stroke-width="2.5"/>
+        <circle cx="8" cy="84" r="3" fill="#1a1710" stroke="none"/>
+      </g>
+      <path d="M62,138 Q74,124 86,134" fill="none" stroke="#3a6625" stroke-width="1.5"/>
+      <ellipse cx="67" cy="131" rx="7" ry="3.5" fill="#3a6625" transform="rotate(-35,67,131)"/>
+      <ellipse cx="75" cy="125" rx="7" ry="3.5" fill="#3a6625" transform="rotate(-15,75,125)"/>
+      <ellipse cx="83" cy="129" rx="6" ry="3" fill="#3a6625" transform="rotate(15,83,129)"/>
+      <path d="M138,138 Q126,124 114,134" fill="none" stroke="#3a6625" stroke-width="1.5"/>
+      <ellipse cx="133" cy="131" rx="7" ry="3.5" fill="#3a6625" transform="rotate(35,133,131)"/>
+      <ellipse cx="125" cy="125" rx="7" ry="3.5" fill="#3a6625" transform="rotate(15,125,125)"/>
+      <ellipse cx="117" cy="129" rx="6" ry="3" fill="#3a6625" transform="rotate(-15,117,129)"/>
+      <circle cx="100" cy="134" r="2.5" fill="#3a6625"/>
+      <text x="100" y="163" font-family="Georgia,'Times New Roman',serif" font-size="24" font-weight="300" fill="#7a6030" text-anchor="middle" letter-spacing="1.5">Tahini</text>
+      <text x="100" y="187" font-family="Georgia,'Times New Roman',serif" font-size="20" font-style="italic" font-weight="400" fill="#9a3820" text-anchor="middle">Plus</text>
+      <text x="100" y="204" font-family="'Arial Narrow',Arial,sans-serif" font-size="8" font-weight="700" fill="#7a7060" text-anchor="middle" letter-spacing="3.5">HALAL KITCHEN</text>
+    </svg>
+  </div>
+  <h1 class="site-name">Tahini <em>Plus</em></h1>
+  <p class="site-tagline">"Tradition Served Beautifully."</p>
+  <p class="site-desc">Authentic Mediterranean &amp; Middle Eastern cuisine, prepared with care, passion, and halal-certified ingredients.</p>
+  <span class="halal-badge">Halal Certified</span>
+</header>
+
+<!-- ── CATEGORY NAV ─────────────────────── -->
+<nav class="cat-nav" aria-label="Menu categories">
+  <div class="cat-nav-inner">
+    <a href="#appetizers" class="cat-btn active">Appetizers</a>
+    <a href="#soups"      class="cat-btn">Soups</a>
+    <a href="#salads"     class="cat-btn">Salads</a>
+    <a href="#fattah"     class="cat-btn">Fattah</a>
+    <a href="#sandwiches" class="cat-btn">Sandwiches</a>
+    <a href="#manaqeesh"  class="cat-btn">Manaqeesh</a>
+    <a href="#mains"      class="cat-btn">Mains</a>
+    <a href="#grills"     class="cat-btn">Grills</a>
+    <a href="#kids"       class="cat-btn">Kids' Meals</a>
+    <a href="#desserts"   class="cat-btn">Desserts</a>
+    <a href="#special"    class="cat-btn">Special Orders</a>
+  </div>
+</nav>
+
+<!-- ── MENU ─────────────────────────────── -->
+<main class="menu-content">
+
+  <!-- ── APPETIZERS & BREAKFAST ─────────── -->
+  <section class="menu-section" id="appetizers">
+    <div class="section-header">
+      <span class="section-icon">🫓</span>
+      <h2 class="section-title">Appetizers &amp; Breakfast</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Mixed Appetizer 1</h3>
+        <p class="item-desc">French fries, 3 falafel, 2 spring rolls, 2 grape leaves, 1 kibbeh, 1 pita bread.</p>
+      </div>
+      <div class="item-price">$14.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Mixed Appetizer 2</h3>
+        <p class="item-desc">Hummus, labneh, muhammara, mutabal, and 2 pita breads.</p>
+      </div>
+      <div class="item-price">$14.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Mixed Pickles</h3>
+        <p class="item-desc">A zesty blend of pickled vegetables in house brine.</p>
+      </div>
+      <div class="item-price">$4.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Kibbeh <span class="item-detail">(Fried, 2 pcs)</span></h3>
+        <p class="item-desc">Golden bulgur shells filled with spiced beef and onions.</p>
+      </div>
+      <div class="item-price">$6.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Kibbeh Sajiya <span class="item-detail">(2 pcs)</span></h3>
+        <p class="item-desc">Pan-seared kibbeh with walnut, chargrilled for a smoky aroma.</p>
+      </div>
+      <div class="item-price">$11.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Kibbeh Tray <span class="item-detail">(Grilled)</span></h3>
+        <p class="item-desc">Layers of bulgur and seasoned beef baked with pine nuts.</p>
+      </div>
+      <div class="item-price">$11.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Kibbeh with Laban <span class="item-detail">(4 pcs)</span></h3>
+        <p class="item-desc">Served in warm yogurt sauce with garlic and cilantro.</p>
+      </div>
+      <div class="item-price">$13.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Hummus</h3>
+        <p class="item-desc">Classic chickpea dip with tahini, lemon, and garlic.</p>
+        <p class="item-addons">Add-ons: Ground Beef, Beef Cubes, or Shawarma (Beef/Chicken) +$4.99</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Sm $6.99</span><span>Lg $9.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Foul <span class="item-detail">(Fūl Medames)</span></h3>
+        <p class="item-desc">Warm fava beans with olive oil, lemon, and garlic.</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Sm $6.99</span><span>Lg $9.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Mussabaha</h3>
+        <p class="item-desc">Whole chickpeas mixed with creamy tahini and lemon.</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Sm $7.99</span><span>Lg $10.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Kodsiah</h3>
+        <p class="item-desc">A blend of hummus and fava beans — smooth and hearty.</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Sm $7.99</span><span>Lg $10.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Mutabal</h3>
+        <p class="item-desc">Smoky roasted eggplant blended with tahini, lemon, and garlic.</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Sm $8.99</span><span>Lg $12.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Muhammara</h3>
+        <p class="item-desc">Walnut and roasted red pepper spread with pomegranate molasses.</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Sm $8.99</span><span>Lg $12.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Labneh</h3>
+        <p class="item-desc">Thick, creamy yogurt with olive oil and mint.</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Sm $7.99</span><span>Lg $10.99</span></div></div>
+    </div>
+
+    <p class="sub-label">Breakfast</p>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Qalayet Bandora</h3>
+        <p class="item-desc">Sautéed tomatoes with herbs.</p>
+        <p class="item-addons">+$4.99 for Beef or Beef Cubes</p>
+      </div>
+      <div class="item-price">$9.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Shakshouka</h3>
+        <p class="item-desc">Eggs poached in spiced tomato, herbs, and garlic.</p>
+        <p class="item-addons">+$4.99 for Beef or Beef Cubes</p>
+      </div>
+      <div class="item-price">$11.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Fried Eggs</h3>
+        <p class="item-desc">Sunny-side up, scrambled, or herb omelet.</p>
+      </div>
+      <div class="item-price">$9.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Ejjeh <span class="item-detail">(2 eggs)</span></h3>
+        <p class="item-desc">A herb-loaded savory omelette.</p>
+      </div>
+      <div class="item-price">$11.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Mufarakeh</h3>
+        <p class="item-desc">Scrambled eggs and fried potatoes garnished with parsley.</p>
+      </div>
+      <div class="item-price">$9.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Chicken Liver</h3>
+        <p class="item-desc">Sautéed with onions, garlic, and pomegranate molasses.</p>
+      </div>
+      <div class="item-price">$11.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Fried Halloumi</h3>
+        <p class="item-desc">Crispy outside, soft inside — a Mediterranean favorite.</p>
+      </div>
+      <div class="item-price">$11.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Sambousek — Meat <span class="item-detail">(4 pcs)</span></h3>
+        <p class="item-desc">Crispy pastry filled with seasoned ground beef.</p>
+      </div>
+      <div class="item-price">$8.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Sambousek — Cheese <span class="item-detail">(4 pcs)</span></h3>
+        <p class="item-desc">Flaky pastry with melted cheese and parsley filling.</p>
+      </div>
+      <div class="item-price">$7.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">French Fries</h3>
+        <p class="item-desc">Crispy, golden perfection.</p>
+      </div>
+      <div class="item-price">$4.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Loaded Fries</h3>
+        <p class="item-desc">Topped with cheese, sauces, and your choice of meat.</p>
+        <p class="item-addons">+$4.99: Chicken Cubes, Beef Cubes, or Shawarma</p>
+      </div>
+      <div class="item-price">$11.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Yalanji <span class="item-detail">(5 pcs)</span></h3>
+        <p class="item-desc">Vegetarian grape leaves filled with rice, tomato, herbs, and olive oil.</p>
+      </div>
+      <div class="item-price">$5.99</div>
+    </div>
+  </section>
+
+  <!-- ── SOUPS ─────────────────────────── -->
+  <section class="menu-section" id="soups">
+    <div class="section-header">
+      <span class="section-icon">🍲</span>
+      <h2 class="section-title">Soups</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Lentil Soup</h3><p class="item-desc">Pureed lentils with cumin and lemon.</p></div>
+      <div class="item-price">$5.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Mushroom Soup</h3><p class="item-desc">Creamy with thyme and sautéed mushrooms.</p></div>
+      <div class="item-price">$5.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Tomato Basil Soup</h3><p class="item-desc">Roasted tomatoes with fresh basil.</p></div>
+      <div class="item-price">$5.99</div>
+    </div>
+  </section>
+
+  <!-- ── SALADS ─────────────────────────── -->
+  <section class="menu-section" id="salads">
+    <div class="section-header">
+      <span class="section-icon">🥗</span>
+      <h2 class="section-title">Salads</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Caesar Salad</h3><p class="item-desc">Romaine, parmesan, croutons.</p></div>
+      <div class="item-price">$7.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Fattoush</h3><p class="item-desc">Crunchy vegetables with pomegranate dressing.</p></div>
+      <div class="item-price">$7.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Tabbouleh</h3><p class="item-desc">Parsley, tomato, onion, bulgur, lemon.</p></div>
+      <div class="item-price">$7.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Greek Salad</h3><p class="item-desc">Tomato, cucumber, feta, olives.</p></div>
+      <div class="item-price">$7.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Yogurt Cucumber Salad</h3><p class="item-desc">Yogurt with cucumber, garlic, mint.</p></div>
+      <div class="item-price">$7.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Green Salad</h3><p class="item-desc">Mixed greens, choice of dressing.</p></div>
+      <div class="item-price">$7.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Chef's Special Salad</h3><p class="item-desc">Large mixed greens, nuts, honey, and chef's special dressing.</p></div>
+      <div class="item-price">$13.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Special Fattoush</h3><p class="item-desc">Large fattoush salad inside puffy pita bread.</p></div>
+      <div class="item-price">$11.99</div>
+    </div>
+  </section>
+
+  <!-- ── FATTAH ──────────────────────────── -->
+  <section class="menu-section" id="fattah">
+    <div class="section-header">
+      <span class="section-icon">🍳</span>
+      <h2 class="section-title">Fattah Selection</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Hummus Fattah</h3>
+        <p class="item-desc">Crispy pita, creamy hummus, chickpeas, butter &amp; pine nuts.</p>
+        <p class="item-addons">Add ground beef or shawarma +$4.99</p>
+      </div>
+      <div class="item-price">$11.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Yalanji Fattah</h3><p class="item-desc">Vine leaves over yogurt sauce &amp; toasted bread.</p></div>
+      <div class="item-price">$6.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Makdous Fattah</h3><p class="item-desc">Eggplant makdous with garlic-buttered bread and Badweh sauce.</p></div>
+      <div class="item-price">$9.99</div>
+    </div>
+  </section>
+
+  <!-- ── SANDWICHES ─────────────────────── -->
+  <section class="menu-section" id="sandwiches">
+    <div class="section-header">
+      <span class="section-icon">🥙</span>
+      <h2 class="section-title">Sandwiches &amp; Wraps</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Falafel Sandwich</h3>
+        <p class="item-desc">Falafel with lettuce, tomato, pickles, and tahini.</p>
+        <p class="item-addons">+Hummus $1 | +Maqali $4 | +Fries $3.99</p>
+      </div>
+      <div class="item-price">$8.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Sujuk Sandwich</h3><p class="item-desc">Spicy Lebanese sausage with pickles &amp; garlic sauce.</p></div>
+      <div class="item-price">$7.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Beef Shawarma Sandwich</h3><p class="item-desc">Tender marinated shawarma wrapped with pickles &amp; veggies.</p></div>
+      <div class="item-price">$10.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Chicken Shawarma Sandwich</h3><p class="item-desc">Juicy marinated chicken shawarma wrap.</p></div>
+      <div class="item-price">$9.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Special Shawarma</h3><p class="item-desc">Blend of chicken &amp; beef with house sauces.</p></div>
+      <div class="item-price">$12.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Philly Cheesesteak</h3><p class="item-desc">Grilled beef with onions, peppers &amp; cheese.</p></div>
+      <div class="item-price">$11.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Cheeseburger</h3><p class="item-desc">Beef patty with cheese, lettuce, tomato, pickles.</p></div>
+      <div class="item-price">$8.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Chicken Sandwich</h3><p class="item-desc">Crispy chicken fillet with veggies.</p></div>
+      <div class="item-price">$8.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Gyro Sandwich</h3><p class="item-desc">Seasoned beef &amp; lamb with tzatziki.</p></div>
+      <div class="item-price">$9.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Kufta Kebab Sandwich</h3><p class="item-desc">Ground beef kebab with herbs &amp; vegetables.</p></div>
+      <div class="item-price">$10.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Shish Tawook Sandwich</h3><p class="item-desc">Grilled chicken cubes with garlic sauce &amp; pickles.</p></div>
+      <div class="item-price">$10.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Veggie Burger</h3><p class="item-desc">Plant-based patty with lettuce, tomato, and sauce.</p></div>
+      <div class="item-price">$8.99</div>
+    </div>
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Hot Dog</h3><p class="item-desc">Classic grilled beef frank with condiments.</p></div>
+      <div class="item-price">$5.99</div>
+    </div>
+
+    <div class="item signature">
+      <div class="item-main">
+        <span class="sig-badge">House Specialty</span>
+        <h3 class="item-name">Special Wrap</h3>
+        <p class="item-desc">Your choice of kufta kebab, chicken tawook, or beef skewers — chargrilled with grilled vegetables, wrapped in dough, baked to perfection with sesame and black seed.</p>
+      </div>
+      <div class="item-price">$14.99</div>
+    </div>
+  </section>
+
+  <!-- ── MANAQEESH ─────────────────────── -->
+  <section class="menu-section" id="manaqeesh">
+    <div class="section-header">
+      <span class="section-icon">🫓</span>
+      <h2 class="section-title">Manaqeesh &amp; Pastries</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <p class="sub-label">Flatbreads</p>
+    <div class="item"><div class="item-main"><h3 class="item-name">Zaatar</h3><p class="item-desc">Wild thyme, sesame, olive oil.</p></div><div class="item-price">$5.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Cheese</h3><p class="item-desc">Traditional white cheese.</p></div><div class="item-price">$5.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Cheese with Parsley</h3></div><div class="item-price">$5.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Cheese with Pesto</h3><p class="item-desc">Basil pesto &amp; cheese.</p></div><div class="item-price">$6.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Halloumi</h3><p class="item-desc">Grilled halloumi flatbread.</p></div><div class="item-price">$11.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">½ Zaatar + ½ Cheese</h3><p class="item-desc">Mix of thyme &amp; melted cheese.</p></div><div class="item-price">$5.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Muhammara with Cheese</h3><p class="item-desc">Red pepper, walnut &amp; cheese.</p></div><div class="item-price">$7.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Meat</h3><p class="item-desc">Ground beef with herbs.</p></div><div class="item-price">$7.49</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Labneh</h3><p class="item-desc">Creamy strained yogurt with mint.</p></div><div class="item-price">$6.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Sujuk</h3><p class="item-desc">Spicy Lebanese sausage.</p></div><div class="item-price">$7.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Sujuk with Cheese</h3><p class="item-desc">Spicy sausage &amp; melted cheese.</p></div><div class="item-price">$8.99</div></div>
+
+    <p class="sub-label">Savory Pastries</p>
+    <div class="item"><div class="item-main"><h3 class="item-name">Arayes</h3><p class="item-desc">Grilled pita stuffed with spiced beef.</p></div><div class="item-price">$12.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Sfeeha Baalbakieh <span class="item-detail">(6 pcs)</span></h3><p class="item-desc">Mini open meat pies.</p></div><div class="item-price">$11.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Fatayer Spinach <span class="item-detail">(6 pcs)</span></h3><p class="item-desc">Mini triangles with spinach mix.</p></div><div class="item-price">$10.99</div></div>
+  </section>
+
+  <!-- ── MAIN DISHES ────────────────────── -->
+  <section class="menu-section" id="mains">
+    <div class="section-header">
+      <span class="section-icon">🍛</span>
+      <h2 class="section-title">Main Dishes</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="item signature">
+      <div class="item-main">
+        <span class="sig-badge">House Signature</span>
+        <h3 class="item-name">Makloubeh</h3>
+        <p class="item-desc">A celebrated Palestinian dish — layered rice, meat, and vegetables slow-cooked and dramatically flipped onto a serving platter.</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Chkn $34.99</span><span>Lamb $44.99</span></div></div>
+    </div>
+
+    <div class="item signature">
+      <div class="item-main">
+        <span class="sig-badge">Feeds 2–3</span>
+        <h3 class="item-name">Qidreh</h3>
+        <p class="item-desc">From the city of Hebron: spiced meat, fragrant rice, garlic, and chickpeas slow-cooked in a heavy pot.</p>
+      </div>
+      <div class="item-price"><div class="size-row"><span>Chkn $34.99</span><span>Lamb $44.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Mansaf</h3>
+        <p class="item-desc">Lamb in creamy yogurt sauce over rice with Shrak bread.</p>
+        <p class="item-addons">+Extra Meat $9.99</p>
+      </div>
+      <div class="item-price">$19.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Musakhan</h3><p class="item-desc">½ Chicken baked with caramelized onions, sumac &amp; olive oil on taboon bread.</p></div>
+      <div class="item-price">$17.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Kufta</h3><p class="item-desc">Spiced ground beef or lamb, grilled or baked, with rice &amp; salad.</p></div>
+      <div class="item-price">$17.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Shushbarak <span class="item-detail">(10 pcs)</span></h3><p class="item-desc">Beef dumplings in garlicky yogurt sauce.</p></div>
+      <div class="item-price">$19.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Gyro Platter</h3><p class="item-desc">Beef &amp; lamb with rice, salad, &amp; tzatziki.</p></div>
+      <div class="item-price">$13.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Shawarma Platter</h3><p class="item-desc">Choice of beef or chicken; served with rice &amp; salad.</p></div>
+      <div class="item-price"><div class="size-row"><span>Chkn $13.99</span><span>Beef $14.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Chargrilled Chicken</h3><p class="item-desc">Mediterranean spiced, served with rice &amp; salad.</p></div>
+      <div class="item-price"><div class="size-row"><span>½ $14.99</span><span>Whole $23.99</span></div></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Lamb Shank</h3><p class="item-desc">Slow-cooked lamb over seasoned rice.</p></div>
+      <div class="item-price">$22.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main"><h3 class="item-name">Chargrilled Fish</h3><p class="item-desc">Whole fish marinated in Mediterranean spices.</p></div>
+      <div class="item-price">$24.99</div>
+    </div>
+  </section>
+
+  <!-- ── GRILLS ──────────────────────────── -->
+  <section class="menu-section" id="grills">
+    <div class="section-header">
+      <span class="section-icon">🔥</span>
+      <h2 class="section-title">Grills &amp; Platters</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Mixed Grill for One</h3>
+        <p class="item-desc">Two skewers of your choice with rice &amp; salad.</p>
+        <p class="item-addons">Choose any 2 (chicken or kufta; +$1 for meat skewer)</p>
+      </div>
+      <div class="item-price">$17.99</div>
+    </div>
+
+    <div class="item signature">
+      <div class="item-main">
+        <span class="sig-badge">For Sharing</span>
+        <h3 class="item-name">Tahini Mixed Grill</h3>
+        <p class="item-desc">2 Chicken, 2 Kufta, 2 Meat skewers with rice &amp; salad.</p>
+        <p class="item-addons">+$1 upgrade per skewer to replace chicken or kufta</p>
+      </div>
+      <div class="item-price">$49.99</div>
+    </div>
+
+    <div class="item signature">
+      <div class="item-main">
+        <span class="sig-badge">Family Feast</span>
+        <h3 class="item-name">Tahini Family Mixed Grill</h3>
+        <p class="item-desc">3 Chicken, 3 Kufta, 3 Meat, 3 Lamb Chops — rice &amp; salad, 2 large dips of your choice, 4 pita breads.</p>
+      </div>
+      <div class="item-price">$109.99</div>
+    </div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Lamb Chop Platter</h3>
+        <p class="item-desc">Bone-in (3 pcs) or boneless (4 pcs) with rice &amp; salad.</p>
+      </div>
+      <div class="item-price">$24.99</div>
+    </div>
+
+    <div class="build-own">
+      <h3>Build Your Own Platter</h3>
+      <p class="build-sub">Mix your favorite skewers — all served with rice &amp; salad</p>
+      <div class="build-grid">
+        <div class="build-row"><span class="build-name">Lamb Skewer</span><span class="build-price">$9.99</span></div>
+        <div class="build-row"><span class="build-name">Beef Skewer</span><span class="build-price">$9.99</span></div>
+        <div class="build-row"><span class="build-name">Kufta Kebab</span><span class="build-price">$8.99</span></div>
+        <div class="build-row"><span class="build-name">Shish Tawook</span><span class="build-price">$8.99</span></div>
+        <div class="build-row"><span class="build-name">Lamb Chop (bone-in)</span><span class="build-price">$7.99</span></div>
+        <div class="build-row"><span class="build-name">Lamb Chop (boneless)</span><span class="build-price">$6.99</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── KIDS' MEALS ────────────────────── -->
+  <section class="menu-section" id="kids">
+    <div class="section-header">
+      <span class="section-icon">🍟</span>
+      <h2 class="section-title">Kids' Meals</h2>
+      <div class="section-line"></div>
+    </div>
+    <p class="notice">All kids' meals served with French fries.</p>
+    <div class="item"><div class="item-main"><h3 class="item-name">Chicken Tenders <span class="item-detail">(3 pcs)</span></h3></div><div class="item-price">$10.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Nuggets <span class="item-detail">(6 pcs)</span></h3></div><div class="item-price">$10.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Mozzarella Sticks <span class="item-detail">(3 pcs)</span></h3></div><div class="item-price">$5.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Chicken Sandwich</h3></div><div class="item-price">$10.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Cheeseburger</h3></div><div class="item-price">$10.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Hot Dog</h3></div><div class="item-price">$8.99</div></div>
+
+    <p class="sub-label">Sides &amp; Bread</p>
+    <div class="item"><div class="item-main"><h3 class="item-name">Pita Bread</h3><p class="item-desc">Soft, warm, and oven-fresh.</p></div><div class="item-price">$0.99</div></div>
+  </section>
+
+  <!-- ── DESSERTS ───────────────────────── -->
+  <section class="menu-section" id="desserts">
+    <div class="section-header">
+      <span class="section-icon">🍮</span>
+      <h2 class="section-title">Desserts</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Kunafeh <span class="item-detail">(Na'meh or Kheshneh)</span></h3></div><div class="item-price">$8.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Om Ali</h3></div><div class="item-price">$6.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Muhalabia</h3></div><div class="item-price">$4.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Rice Pudding</h3></div><div class="item-price">$4.99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Dubai Chocolate Cake</h3></div><div class="item-price">$9.99</div></div>
+  </section>
+
+  <!-- ── SPECIAL ORDERS ─────────────────── -->
+  <section class="menu-section" id="special">
+    <div class="section-header">
+      <span class="section-icon">🐑</span>
+      <h2 class="section-title">Special Orders</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="notice">24-hour advance notice required. Call ahead to place your order.</div>
+
+    <div class="item">
+      <div class="item-main">
+        <h3 class="item-name">Musakhan Rolls</h3>
+        <p class="item-desc">Chicken with onions &amp; sumac, baked in thin bread.</p>
+        <p class="item-addons">Minimum 10 pieces</p>
+      </div>
+      <div class="item-price">$5.99 ea</div>
+    </div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Grilled Lamb Shoulder over Rice</h3><p class="item-desc">With salad.</p></div><div class="item-price">$99</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Whole Grilled Lamb over Rice</h3><p class="item-desc">With large salad &amp; yogurt cucumber.</p></div><div class="item-price">$499</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Kabsa</h3><p class="item-desc">Spiced rice with chicken or lamb.</p></div><div class="item-price"><div class="size-row"><span>Chkn $129</span><span>Lamb $199</span></div></div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Sayadiah</h3><p class="item-desc">Fish with rice &amp; tomato sauce. Serves 10.</p></div><div class="item-price">$199</div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Ouzi</h3><p class="item-desc">Basmati rice with lamb, peas, and spices.</p></div><div class="item-price"><div class="size-row"><span>Chkn $129</span><span>Lamb $199</span></div></div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Kedreh</h3><p class="item-desc">Palestinian rice with lamb broth, chickpeas, and garlic. Serves 10.</p></div><div class="item-price"><div class="size-row"><span>Chkn $129</span><span>Lamb $199</span></div></div></div>
+    <div class="item"><div class="item-main"><h3 class="item-name">Mansaf Tray</h3><p class="item-desc">Family-style serving for 10 people.</p></div><div class="item-price">$199</div></div>
+
+    <div class="notice" style="margin-top: var(--space-8); text-align: center; font-style: normal; font-size: var(--text-base); color: var(--ink); border-left: none; background: var(--surface-alt);">
+      <strong style="font-family: var(--font-display); font-weight: 400; font-style: italic; color: var(--olive);">If you ask for it, we will make it.</strong>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── FOOTER ────────────────────────────── -->
+<footer class="site-footer">
+  <p class="footer-name">Tahini <em>Plus</em></p>
+  <p class="footer-tagline">"Tradition Served Beautifully."</p>
+  <p class="footer-info">
+    Hwy 6 &amp; Bellaire · Houston, TX<br>
+    Halal Certified &nbsp;·&nbsp; Dine-In &nbsp;·&nbsp; Takeout &nbsp;·&nbsp; Catering
+  </p>
+  <p class="footer-note">Menu prices and availability subject to change without notice.</p>
+</footer>
+
+<script>
+(function() {
+  const sections = document.querySelectorAll('.menu-section');
+  const buttons  = document.querySelectorAll('.cat-btn');
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const id  = e.target.id;
+      const btn = document.querySelector(`.cat-btn[href="#${id}"]`);
+      if (!btn) return;
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      btn.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+    });
+  }, { rootMargin: '-15% 0px -75% 0px' });
+
+  sections.forEach(s => io.observe(s));
+})();
+</script>
+</body>
+</html>

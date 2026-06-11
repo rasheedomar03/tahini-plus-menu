@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tahini Plus — Print QR Code Cards</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+:root {
+  --canvas:     oklch(97% 0.008 82);
+  --olive:      oklch(45% 0.065 82);
+  --terra:      oklch(53% 0.108 37);
+  --ink:        oklch(20% 0.006 75);
+  --ink-muted:  oklch(50% 0.01 75);
+  --border:     oklch(85% 0.012 82);
+  --font-d:     'Fraunces', Georgia, serif;
+  --font-b:     'Outfit', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { font-family: var(--font-b); background: oklch(90% 0.01 82); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+/* ── Top bar ── */
+.topbar {
+  background: oklch(99.5% 0.003 82);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.topbar-brand {
+  font-family: var(--font-d);
+  font-size: 1.0625rem;
+  font-weight: 300;
+  color: var(--olive);
+  margin-right: auto;
+}
+.topbar-brand em { color: var(--terra); font-style: italic; font-weight: 400; }
+
+.url-group { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.url-group label { font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); white-space: nowrap; }
+.url-group input {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-family: var(--font-b);
+  background: var(--canvas);
+  color: var(--ink);
+  outline: none;
+  width: 260px;
+}
+.url-group input:focus { border-color: var(--terra); box-shadow: 0 0 0 3px oklch(85% 0.04 37); }
+
+.btn {
+  padding: 0.4375rem 1.125rem;
+  border: none;
+  border-radius: 9999px;
+  font-family: var(--font-b);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 38px;
+  transition: opacity 150ms ease;
+  white-space: nowrap;
+}
+.btn:hover { opacity: 0.85; }
+.btn-update { background: oklch(92% 0.015 82); color: var(--ink); border: 1px solid var(--border); }
+.btn-print  { background: var(--terra); color: oklch(98% 0.004 37); }
+
+/* ── Card grid ── */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 2rem;
+  justify-content: center;
+}
+
+/* ── Single QR card ── */
+.qr-card {
+  width: 3.5in;
+  background: oklch(99.5% 0.003 82);
+  border-radius: 0.75rem;
+  padding: 0.75in 0.625in 0.625in;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 24px oklch(60% 0.02 75 / 0.15), 0 1px 4px oklch(60% 0.02 75 / 0.08);
+  border: 1px solid var(--border);
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.qr-card::before, .qr-card::after {
+  content: "";
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-color: oklch(88% 0.018 82);
+  border-style: solid;
+}
+.qr-card::before { top: 12px; left: 12px; border-width: 1.5px 0 0 1.5px; border-radius: 4px 0 0 0; }
+.qr-card::after  { bottom: 12px; right: 12px; border-width: 0 1.5px 1.5px 0; border-radius: 0 0 4px 0; }
+
+.card-logo-svg {
+  width: 100px;
+  height: auto;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.card-name {
+  font-family: var(--font-d);
+  font-size: 1.375rem;
+  font-weight: 300;
+  color: var(--olive);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.card-name em { color: var(--terra); font-style: italic; font-weight: 400; }
+.card-sub {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: oklch(60% 0.025 82);
+  margin-bottom: 0.5rem;
+}
+.card-divider {
+  width: 40px;
+  height: 1.5px;
+  background: linear-gradient(to right, transparent, var(--terra), transparent);
+  border: none;
+  margin: 0.25rem 0;
+}
+.card-prompt {
+  font-family: var(--font-d);
+  font-style: italic;
+  font-size: 0.8125rem;
+  color: oklch(52% 0.012 75);
+  margin-bottom: 0.625rem;
+}
+.qr-wrap {
+  padding: 0.5rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  border: 1px solid oklch(92% 0.008 82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qr-wrap canvas, .qr-wrap img { display: block; }
+.card-url {
+  font-size: 0.5625rem;
+  color: oklch(60% 0.01 75);
+  word-break: break-all;
+  max-width: 2.75in;
+  margin-top: 0.375rem;
+  font-family: monospace;
+}
+.card-tagline {
+  font-family: var(--font-d);
+  font-style: italic;
+  font-size: 0.6875rem;
+  color: oklch(58% 0.012 75);
+  margin-top: 0.5rem;
+}
+.card-halal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: oklch(38% 0.1 145);
+  background: oklch(97% 0.018 145);
+  border: 1px solid oklch(84% 0.042 140);
+  border-radius: 9999px;
+  padding: 0.1875rem 0.5rem;
+  margin-top: 0.25rem;
+}
+.card-halal::before { content: "✦"; }
+
+/* ── Print ── */
+@media print {
+  body { background: white; }
+  .topbar { display: none !important; }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 3.5in);
+    gap: 0.25in;
+    padding: 0.25in;
+    justify-content: center;
+  }
+  .qr-card {
+    box-shadow: none;
+    border: 1px solid oklch(82% 0.012 82);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Top bar (hidden on print) ── -->
+<div class="topbar">
+  <p class="topbar-brand">Tahini <em>Plus</em> — QR Print Cards</p>
+  <div class="url-group">
+    <label for="url-input">Menu URL:</label>
+    <input id="url-input" type="url" value="https://tahiniplus.com/menu" placeholder="https://yoursite.com/menu">
+    <button class="btn btn-update" onclick="generateQR()">Update QR</button>
+  </div>
+  <button class="btn btn-print" onclick="window.print()">Print Cards</button>
+</div>
+
+<!-- ── Card grid ── -->
+<div class="card-grid" id="card-grid"></div>
+
+<script>
+const NUM_CARDS = 4;
+
+/* Returns the full SVG logo with unique IDs to avoid conflicts across 4 cards */
+function logoSVG(idx) {
+  return `<svg class="card-logo-svg" viewBox="0 0 200 215" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <pattern id="kef${idx}" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+        <rect width="10" height="10" fill="#fdf8f4"/>
+        <path d="M0,5 L5,0 L10,5 L5,10 Z" fill="none" stroke="#c94020" stroke-width="0.9"/>
+        <line x1="5" y1="0" x2="5" y2="10" stroke="#2a1a10" stroke-width="0.3" opacity="0.4"/>
+        <line x1="0" y1="5" x2="10" y2="5" stroke="#2a1a10" stroke-width="0.3" opacity="0.4"/>
+        <circle cx="5" cy="5" r="1" fill="#c94020"/>
+      </pattern>
+      <clipPath id="pc${idx}"><circle cx="100" cy="90" r="44"/></clipPath>
+    </defs>
+    <circle cx="100" cy="90" r="82" fill="none" stroke="#7a6030" stroke-width="2"/>
+    <circle cx="100" cy="90" r="77" fill="none" stroke="#7a6030" stroke-width="0.7" stroke-dasharray="4,3" opacity="0.6"/>
+    <circle cx="100" cy="90" r="44" fill="#fdf8f4"/>
+    <circle cx="100" cy="90" r="44" fill="url(#kef${idx})" clip-path="url(#pc${idx})"/>
+    <circle cx="100" cy="90" r="44" fill="none" stroke="#1a1710" stroke-width="2.5"/>
+    <circle cx="100" cy="90" r="36" fill="none" stroke="#1a1710" stroke-width="0.8" opacity="0.5"/>
+    <circle cx="100" cy="90" r="4" fill="#c94020"/>
+    <g transform="translate(34,44)" stroke="#1a1710" stroke-linecap="round" fill="none">
+      <line x1="6" y1="2" x2="5" y2="24" stroke-width="1.8"/>
+      <line x1="10" y1="2" x2="10" y2="24" stroke-width="1.8"/>
+      <line x1="14" y1="2" x2="13" y2="24" stroke-width="1.8"/>
+      <path d="M4.5,24 Q10,29 15,24" stroke-width="1.6"/>
+      <line x1="10" y1="29" x2="10" y2="84" stroke-width="2.5"/>
+      <circle cx="10" cy="84" r="3" fill="#1a1710" stroke="none"/>
+    </g>
+    <g transform="translate(148,44)" stroke="#1a1710" stroke-linecap="round" fill="none">
+      <ellipse cx="8" cy="12" rx="7" ry="10" stroke-width="2"/>
+      <ellipse cx="8" cy="12" rx="4" ry="6.5" stroke-width="0.8" opacity="0.4"/>
+      <line x1="8" y1="22" x2="8" y2="84" stroke-width="2.5"/>
+      <circle cx="8" cy="84" r="3" fill="#1a1710" stroke="none"/>
+    </g>
+    <path d="M62,138 Q74,124 86,134" fill="none" stroke="#3a6625" stroke-width="1.5"/>
+    <ellipse cx="67" cy="131" rx="7" ry="3.5" fill="#3a6625" transform="rotate(-35,67,131)"/>
+    <ellipse cx="75" cy="125" rx="7" ry="3.5" fill="#3a6625" transform="rotate(-15,75,125)"/>
+    <ellipse cx="83" cy="129" rx="6" ry="3" fill="#3a6625" transform="rotate(15,83,129)"/>
+    <path d="M138,138 Q126,124 114,134" fill="none" stroke="#3a6625" stroke-width="1.5"/>
+    <ellipse cx="133" cy="131" rx="7" ry="3.5" fill="#3a6625" transform="rotate(35,133,131)"/>
+    <ellipse cx="125" cy="125" rx="7" ry="3.5" fill="#3a6625" transform="rotate(15,125,125)"/>
+    <ellipse cx="117" cy="129" rx="6" ry="3" fill="#3a6625" transform="rotate(-15,117,129)"/>
+    <circle cx="100" cy="134" r="2.5" fill="#3a6625"/>
+    <text x="100" y="163" font-family="Georgia,'Times New Roman',serif" font-size="24" font-weight="300" fill="#7a6030" text-anchor="middle" letter-spacing="1.5">Tahini</text>
+    <text x="100" y="187" font-family="Georgia,'Times New Roman',serif" font-size="20" font-style="italic" font-weight="400" fill="#9a3820" text-anchor="middle">Plus</text>
+    <text x="100" y="204" font-family="'Arial Narrow',Arial,sans-serif" font-size="8" font-weight="700" fill="#7a7060" text-anchor="middle" letter-spacing="3.5">HALAL KITCHEN</text>
+  </svg>`;
+}
+
+function generateQR() {
+  const url = document.getElementById('url-input').value.trim() || 'https://tahiniplus.com/menu';
+  const grid = document.getElementById('card-grid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < NUM_CARDS; i++) {
+    const card = document.createElement('div');
+    card.className = 'qr-card';
+    card.innerHTML = `
+      ${logoSVG(i)}
+      <p class="card-name">Tahini <em>Plus</em></p>
+      <p class="card-sub">Halal Kitchen</p>
+      <hr class="card-divider">
+      <p class="card-prompt">Scan to view our full menu</p>
+      <div class="qr-wrap" id="qr-${i}"></div>
+      <p class="card-url">${url}</p>
+      <p class="card-tagline">"Tradition Served Beautifully."</p>
+      <span class="card-halal">Halal Certified</span>
+    `;
+    grid.appendChild(card);
+
+    ;(function(idx, u) {
+      QRCode.toCanvas(document.createElement('canvas'), u, {
+        width: 160, margin: 1,
+        color: { dark: '#281f1a', light: '#ffffff' }
+      }, (err, canvas) => {
+        if (!err) {
+          const wrap = document.getElementById('qr-' + idx);
+          if (wrap) { wrap.innerHTML = ''; wrap.appendChild(canvas); }
+        }
+      });
+    })(i, url);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', generateQR);
+document.getElementById('url-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generateQR();
+});
+</script>
+</body>
+</html>
