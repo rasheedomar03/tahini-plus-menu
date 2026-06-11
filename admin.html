@@ -498,37 +498,67 @@ function addPhoto(slug) {
 
   if (pendingFile) {
     var ext = (pendingFile.name.split('.').pop() || 'jpg').toLowerCase().replace('jpeg','jpg');
-    var ref = fbStorage.ref('menu-photos/' + slug + '_' + Date.now() + '.' + ext);
-    var task = ref.put(pendingFile);
+    var storageRef = fbStorage.ref('menu-photos/' + slug + '_' + (new Date().getTime()) + '.' + ext);
 
-    // Show progress
     var progBar  = document.getElementById('progress-' + slug);
     var progFill = document.getElementById('progressfill-' + slug);
     progBar.classList.add('visible');
 
-    task.on('state_changed',
-      function(snap) {
-        var pct = (snap.bytesTransferred / snap.totalBytes) * 100;
-        progFill.style.width = pct + '%';
-      },
-      function(err) {
-        showToast(err.message || 'Upload failed.', true);
-        btn.disabled = false; btn.textContent = 'Add this photo';
-        progBar.classList.remove('visible');
-      },
-      function() {
-        ref.getDownloadURL().then(function(url) {
-          item.photos.push(url);
-          saveToFirestore(slug, item.photos, function() {
-            refreshCard(item);
-            closeAddPanel(slug);
-            btn.disabled = false; btn.textContent = 'Add this photo';
-            progBar.classList.remove('visible'); progFill.style.width = '0%';
-            showToast('Photo saved!');
-          });
-        });
+    function resetUploadUI() {
+      btn.disabled = false; btn.textContent = 'Add this photo';
+      progBar.classList.remove('visible'); progFill.style.width = '0%';
+    }
+
+    function uploadErrorMsg(err) {
+      var code = err.code || '';
+      if (code === 'storage/unauthorized')   return 'Firebase Storage rules are blocking uploads. Open Firebase Console → Storage → Rules and make sure writes are allowed.';
+      if (code === 'storage/canceled')       return 'Upload cancelled.';
+      if (code === 'storage/retry-limit-exceeded') return 'Upload timed out. Check your internet connection.';
+      if (code.indexOf('cors') !== -1)       return 'CORS error — see console for details.';
+      return 'Upload failed (' + (code || err.message || 'unknown') + ')';
+    }
+
+    var task;
+    try {
+      task = storageRef.put(pendingFile);
+    } catch(initErr) {
+      showToast('Storage error: ' + initErr.message, true);
+      resetUploadUI(); return;
+    }
+
+    // 45-second hard timeout
+    var uploadTimer = setTimeout(function() {
+      try { task.cancel(); } catch(e) {}
+      showToast('Upload timed out after 45 s. Check Firebase Storage rules and your connection.', true);
+      resetUploadUI();
+    }, 45000);
+
+    // Progress bar
+    task.on('state_changed', function(snap) {
+      if (snap.totalBytes > 0) {
+        progFill.style.width = ((snap.bytesTransferred / snap.totalBytes) * 100) + '%';
       }
-    );
+    });
+
+    // Use promise for completion + error (more reliable than on() callbacks)
+    task.then(function() {
+      return storageRef.getDownloadURL();
+    }).then(function(url) {
+      clearTimeout(uploadTimer);
+      item.photos.push(url);
+      saveToFirestore(slug, item.photos, function() {
+        refreshCard(item);
+        closeAddPanel(slug);
+        resetUploadUI();
+        showToast('Photo saved!');
+      });
+    }).catch(function(err) {
+      clearTimeout(uploadTimer);
+      showToast(uploadErrorMsg(err), true);
+      console.error('[Storage upload error]', err);
+      resetUploadUI();
+    });
+
   } else {
     item.photos.push(pendingUrl);
     saveToFirestore(slug, item.photos, function() {
