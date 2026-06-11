@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tahini Plus · Photo Manager</title>
+<title>Tahini Plus · Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -16,215 +16,583 @@
   --surface:    oklch(99.5% 0.003 82);
   --ink:        oklch(20% 0.006 75);
   --ink-muted:  oklch(50% 0.01 75);
-  --olive:      oklch(45% 0.065 82);
+  --ink-subtle: oklch(65% 0.008 75);
   --terracotta: oklch(53% 0.108 37);
+  --olive:      oklch(45% 0.065 82);
   --border:     oklch(88% 0.01 82);
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body:    'Outfit', system-ui, sans-serif;
-  --radius: 10px;
+  --halal-bg:   oklch(93% 0.04 145);
+  --halal-text: oklch(36% 0.1 145);
+  --font-d: 'Fraunces', Georgia, serif;
+  --font-b: 'Outfit', system-ui, sans-serif;
+  --r: 12px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);min-height:100dvh}
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:10}
-.header img{height:44px;width:auto}
-.header-title{font-family:var(--font-display);font-size:1.15rem;font-weight:400}
-.header-title em{font-style:italic;color:var(--terracotta)}
-.header-sub{font-size:.72rem;color:var(--ink-muted);margin-top:.15rem}
-.wrap{max-width:680px;margin:0 auto;padding:0 1.5rem}
-/* Setup */
-.setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin:2rem auto;max-width:680px;margin-left:auto;margin-right:auto}
-.setup-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-.setup-title{font-family:var(--font-display);font-size:1rem;font-weight:400}
-.status{font-size:.75rem;padding:.3rem .75rem;border-radius:20px;font-weight:500}
-.status.ok{background:oklch(93% 0.04 145);color:oklch(36% 0.1 145)}
-.status.off{background:oklch(94% 0.02 37);color:var(--terracotta)}
-.setup-steps{font-size:.8rem;color:var(--ink-muted);margin-bottom:1rem;line-height:1.6;padding-left:1.1rem;display:flex;flex-direction:column;gap:.2rem}
-.setup-steps a{color:var(--terracotta)}
-.setup-steps code{background:var(--border);padding:.1em .3em;border-radius:3px;font-size:.88em}
-.config-area{width:100%;height:72px;resize:vertical;padding:.55rem .75rem;border:1px solid var(--border);border-radius:8px;font-family:monospace;font-size:.72rem;background:var(--canvas);color:var(--ink);outline:none;margin-bottom:.75rem}
-.config-area:focus{border-color:var(--terracotta)}
-.row{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
-/* Buttons */
-.btn{padding:.55rem 1.2rem;border-radius:8px;font-family:var(--font-body);font-size:.875rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--canvas);color:var(--ink);transition:opacity .15s}
-.btn:hover{opacity:.8}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-primary{background:var(--terracotta);border-color:var(--terracotta);color:#fff}
-/* Items */
-.items{display:flex;flex-direction:column;gap:.75rem;margin:0 auto 4rem;max-width:680px;padding:0 1.5rem}
-.card{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.875rem 1rem;transition:border-color .15s}
-.card:hover{border-color:oklch(78% 0.032 37)}
-.thumb{width:72px;height:72px;flex-shrink:0;border-radius:8px;background:oklch(95.5% 0.009 37);border:1.5px dashed oklch(80% 0.028 37);overflow:hidden;display:flex;align-items:center;justify-content:center}
-.thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.thumb-empty::after{content:'';display:block;width:28px;height:28px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9a98a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z'/%3E%3Ccircle cx='12' cy='13' r='4'/%3E%3C/svg%3E") center/contain no-repeat;opacity:.6}
-.info{flex:1;min-width:0}
-.item-name{font-family:var(--font-display);font-size:.95rem;font-weight:400;margin-bottom:.5rem}
-.url-input{width:100%;padding:.5rem .75rem;border:1px solid var(--border);border-radius:7px;font-family:var(--font-body);font-size:.8rem;background:var(--canvas);color:var(--ink);outline:none}
-.url-input:focus{border-color:var(--terracotta)}
-/* Save bar */
-.save-bar{max-width:680px;margin:.25rem auto 1.5rem;display:flex;align-items:center;gap:1rem;padding:0 1.5rem}
-.save-msg{font-size:.78rem;color:var(--ink-muted)}
-/* Toast */
-.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;transition:transform .22s ease;z-index:100}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.err{background:oklch(40% 0.12 37)}
-/* empty/loading */
-.note{text-align:center;padding:3rem 1rem;color:var(--ink-muted);font-size:.875rem}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-b); background: var(--canvas); color: var(--ink); min-height: 100dvh; }
+
+/* ── PIN screen ────────────────────────── */
+#pin-screen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--canvas);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1.5rem; padding: 2rem;
+}
+.pin-logo { font-family: var(--font-d); font-size: 1.75rem; font-weight: 300; color: var(--ink); }
+.pin-logo em { font-style: italic; color: var(--terracotta); }
+.pin-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 2rem 1.75rem;
+  width: 100%; max-width: 320px;
+  display: flex; flex-direction: column; gap: 1rem;
+  box-shadow: 0 4px 24px oklch(20% 0.006 75 / 0.07);
+}
+.pin-label { font-size: 0.875rem; font-weight: 500; color: var(--ink-muted); }
+.pin-input {
+  width: 100%; padding: 0.7rem 1rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: var(--font-b); font-size: 1.1rem;
+  background: var(--canvas); color: var(--ink);
+  outline: none; letter-spacing: 0.15em; text-align: center;
+}
+.pin-input:focus { border-color: var(--terracotta); }
+.pin-err { font-size: 0.78rem; color: var(--terracotta); text-align: center; min-height: 1rem; }
+.btn {
+  padding: 0.6rem 1.25rem; border-radius: 8px;
+  font-family: var(--font-b); font-size: 0.875rem; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border);
+  background: var(--canvas); color: var(--ink);
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.8; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--terracotta); border-color: var(--terracotta); color: #fff; }
+.btn-full { width: 100%; }
+
+/* ── Main app (hidden until PIN passes) ── */
+#app { display: none; }
+
+/* ── Header ──────────────────────────── */
+.header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 1rem 1.25rem; display: flex; align-items: center;
+  gap: 1rem; position: sticky; top: 0; z-index: 10;
+}
+.header img { height: 40px; width: auto; }
+.header-title { font-family: var(--font-d); font-size: 1.1rem; font-weight: 400; }
+.header-title em { font-style: italic; color: var(--terracotta); }
+.header-sub { font-size: 0.7rem; color: var(--ink-muted); margin-top: 0.1rem; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+.conn-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: oklch(55% 0.15 145);
+  display: inline-block;
+}
+
+/* ── Search ──────────────────────────── */
+.search-wrap { padding: 1rem 1.25rem; max-width: 700px; margin: 0 auto; }
+.search-input {
+  width: 100%; padding: 0.65rem 1rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: var(--font-b); font-size: 0.9rem;
+  background: var(--surface); color: var(--ink); outline: none;
+}
+.search-input:focus { border-color: var(--terracotta); }
+
+/* ── Items list ──────────────────────── */
+.items { max-width: 700px; margin: 0 auto; padding: 0 1.25rem 4rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+.item-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+  transition: border-color 0.15s;
+}
+.item-card:hover { border-color: oklch(78% 0.032 37); }
+
+.item-head {
+  display: flex; align-items: center; gap: 0.875rem;
+  padding: 0.875rem 1rem; cursor: pointer;
+}
+.item-thumb {
+  width: 56px; height: 56px; flex-shrink: 0;
+  border-radius: 8px; overflow: hidden;
+  background: oklch(95.5% 0.009 37);
+  border: 1.5px dashed oklch(80% 0.028 37);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.item-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.item-thumb-count {
+  position: absolute; bottom: 2px; right: 3px;
+  background: oklch(20% 0.006 75 / 0.7); color: #fff;
+  font-size: 0.55rem; font-weight: 600;
+  padding: 0.05rem 0.3rem; border-radius: 4px;
+}
+.item-info { flex: 1; min-width: 0; }
+.item-name { font-family: var(--font-d); font-size: 0.9rem; font-weight: 400; }
+.item-meta { font-size: 0.7rem; color: var(--ink-muted); margin-top: 0.1rem; }
+.item-chevron {
+  color: var(--ink-subtle); font-size: 0.9rem;
+  transition: transform 0.2s;
+}
+.item-card.open .item-chevron { transform: rotate(90deg); }
+
+/* ── Expanded editor ─────────────────── */
+.item-editor {
+  border-top: 1px solid var(--border);
+  padding: 1rem; display: none;
+  flex-direction: column; gap: 1rem;
+}
+.item-card.open .item-editor { display: flex; }
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+.photo-slot {
+  aspect-ratio: 1; border-radius: 8px; overflow: hidden;
+  position: relative;
+  background: oklch(95.5% 0.009 37);
+  border: 1.5px dashed oklch(80% 0.028 37);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: border-color 0.15s;
+}
+.photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-slot .slot-remove {
+  position: absolute; top: 2px; right: 2px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: oklch(20% 0.006 75 / 0.75); color: #fff;
+  border: none; font-size: 0.9rem; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.photo-slot.slot-add {
+  flex-direction: column; gap: 0.2rem;
+  font-size: 0.6rem; color: var(--ink-muted);
+  border-style: dashed;
+}
+.photo-slot.slot-add:hover { border-color: var(--terracotta); }
+.photo-slot.slot-add svg { opacity: 0.45; }
+.photos-hint { font-size: 0.72rem; color: var(--ink-muted); }
+
+/* Add photo panel */
+.add-panel {
+  background: oklch(97.5% 0.006 82);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.875rem; display: none;
+  flex-direction: column; gap: 0.75rem;
+}
+.add-panel.visible { display: flex; }
+.add-preview {
+  width: 100%; height: 80px; border-radius: 8px;
+  background: oklch(95% 0.009 37);
+  border: 1.5px dashed oklch(80% 0.028 37);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; color: var(--ink-subtle);
+}
+.add-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.add-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.url-inp {
+  flex: 1; min-width: 0; padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: var(--font-b); font-size: 0.82rem;
+  background: var(--canvas); color: var(--ink); outline: none;
+}
+.url-inp:focus { border-color: var(--terracotta); }
+.add-actions { display: flex; gap: 0.5rem; }
+
+/* ── Upload progress ─────────────────── */
+.progress-bar {
+  height: 3px; border-radius: 2px;
+  background: var(--border); overflow: hidden; display: none;
+}
+.progress-bar.visible { display: block; }
+.progress-fill {
+  height: 100%; background: var(--terracotta);
+  transition: width 0.2s; width: 0%;
+}
+
+/* ── Toast ───────────────────────────── */
+.toast {
+  position: fixed; bottom: 1.5rem; left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: var(--ink); color: #fff;
+  padding: 0.6rem 1.2rem; border-radius: 8px;
+  font-size: 0.85rem; transition: transform 0.22s ease; z-index: 9999;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.err { background: oklch(40% 0.12 37); }
+
+.note { text-align: center; padding: 3rem 1rem; color: var(--ink-muted); font-size: 0.875rem; }
+
+@media (max-width: 500px) {
+  .photos-grid { grid-template-columns: repeat(5, 1fr); gap: 0.35rem; }
+}
 </style>
 </head>
 <body>
-<header class="header">
-  <img src="logo.png" alt="Tahini Plus">
-  <div>
-    <div class="header-title">Tahini <em>Plus</em> &middot; Photo Manager</div>
-    <div class="header-sub">Manage food photos for the live menu</div>
-  </div>
-</header>
 
-<div class="setup wrap" id="setup">
-  <div class="setup-header">
-    <div class="setup-title">Firebase Connection</div>
-    <span class="status off" id="status-badge">Not connected</span>
-  </div>
-  <ol class="setup-steps">
-    <li>Create a free project at <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
-    <li>Add a <strong>Web app</strong> &rarr; copy the <code>firebaseConfig</code> object</li>
-    <li>Enable <strong>Firestore Database</strong> and <strong>Storage</strong> in the console</li>
-    <li>Set both rules to: <code>allow read, write: if true;</code></li>
-  </ol>
-  <textarea id="config-input" class="config-area" placeholder='{"apiKey":"AIza...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea>
-  <div class="row">
-    <button class="btn btn-primary" onclick="connect()">Connect</button>
-    <button class="btn" onclick="disconnect()" id="disconnect-btn" style="display:none">Disconnect</button>
+<!-- ── PIN Screen ───────────────────── -->
+<div id="pin-screen">
+  <div class="pin-logo">Tahini <em>Plus</em></div>
+  <div class="pin-card">
+    <div class="pin-label">Enter admin PIN to continue</div>
+    <input class="pin-input" id="pin-input" type="password" maxlength="20"
+      placeholder="••••" autocomplete="off">
+    <div class="pin-err" id="pin-err"></div>
+    <button class="btn btn-primary btn-full" onclick="checkPin()">Enter</button>
   </div>
 </div>
 
-<div class="save-bar">
-  <button class="btn btn-primary" id="save-btn" onclick="saveAll()" disabled>Save All Changes</button>
-  <span class="save-msg" id="save-msg">Connect Firebase to save photos.</span>
-</div>
+<!-- ── Main App ──────────────────────── -->
+<div id="app">
+  <header class="header">
+    <img src="logo.png" alt="Tahini Plus">
+    <div>
+      <div class="header-title">Tahini <em>Plus</em> · Admin</div>
+      <div class="header-sub">Manage food photos</div>
+    </div>
+    <div class="header-right">
+      <span class="conn-dot" id="conn-dot" style="background: oklch(70% 0.05 37)"></span>
+      <span style="font-size:0.75rem;color:var(--ink-muted)" id="conn-label">Connecting…</span>
+    </div>
+  </header>
 
-<div class="items" id="items-grid">
-  <div class="note">Connect Firebase above to load your menu items.</div>
+  <div class="search-wrap">
+    <input class="search-input" id="search-input" type="search"
+      placeholder="Search menu items…" oninput="filterItems(this.value)">
+  </div>
+
+  <div class="items" id="items-list">
+    <div class="note" id="loading-note">Loading menu items…</div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
+<input type="file" id="global-file-input" accept="image/*" style="display:none">
 
 <script>
-var FB_KEY = 'tahini-firebase-config';
-var fbDb = null, fbStorage = null;
-var connected = false;
+// ── CONFIG — hardcoded so any device can use admin without setup ──
+var FB_CONFIG = {
+  apiKey: "AIzaSyCrI-gYB4uoKnJbTlYA0bpwFwDP7RwFues",
+  authDomain: "tahini-plus-aae1d.firebaseapp.com",
+  projectId: "tahini-plus-aae1d",
+  storageBucket: "tahini-plus-aae1d.firebasestorage.app",
+  messagingSenderId: "757729545275",
+  appId: "1:757729545275:web:4db73fe81bfe458afae01e"
+};
+
+// ── PIN — change this to whatever you want ────────────────────────
+var ADMIN_PIN = 'tahini2025';
+
+var fbDb, fbStorage;
+var allItems = []; // { slug, name, photos[] }
+var activeSlug = null; // currently expanded card
+var pendingFile = null, pendingUrl = null;
 var toastTimer;
 
-window.addEventListener('DOMContentLoaded', function() {
-  var saved = localStorage.getItem(FB_KEY);
-  if (saved) {
-    document.getElementById('config-input').value = saved;
-    connect();
-  }
+// ── PIN check ────────────────────────────────────────────────────
+document.getElementById('pin-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPin();
 });
 
-function connect() {
-  var raw = document.getElementById('config-input').value.trim();
-  if (!raw) { showToast('Paste your Firebase config first.', true); return; }
-  var cfg;
-  try {
-    var json = raw.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
-    cfg = JSON.parse(json);
-    if (!cfg.apiKey || !cfg.projectId) throw new Error();
-  } catch(e) { showToast('Invalid config — paste the { ... } object.', true); return; }
+function checkPin() {
+  var val = document.getElementById('pin-input').value.trim();
+  if (val === ADMIN_PIN) {
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initFirebase();
+  } else {
+    document.getElementById('pin-err').textContent = 'Incorrect PIN. Try again.';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+  }
+}
 
+// ── Firebase init ─────────────────────────────────────────────────
+function initFirebase() {
   try {
-    var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(cfg);
-    fbDb = firebase.firestore();
+    var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FB_CONFIG);
+    fbDb      = firebase.firestore();
     fbStorage = firebase.storage();
-  } catch(e) { showToast('Firebase init failed: '+e.message, true); return; }
-
-  localStorage.setItem(FB_KEY, JSON.stringify(cfg));
-  connected = true;
-  document.getElementById('status-badge').textContent = 'Connected';
-  document.getElementById('status-badge').className = 'status ok';
-  document.getElementById('disconnect-btn').style.display = '';
-  document.getElementById('save-btn').disabled = false;
-  document.getElementById('save-msg').textContent = 'Changes save instantly to Firebase.';
-  loadItems();
+    document.getElementById('conn-dot').style.background = 'oklch(55% 0.15 145)';
+    document.getElementById('conn-label').textContent = 'Connected';
+    loadItems();
+  } catch(e) {
+    document.getElementById('conn-dot').style.background = 'oklch(50% 0.15 37)';
+    document.getElementById('conn-label').textContent = 'Error';
+    showToast('Firebase error: ' + e.message, true);
+  }
 }
 
-function disconnect() {
-  localStorage.removeItem(FB_KEY);
-  location.reload();
-}
-
+// ── Load items from index.html + Firestore ────────────────────────
 async function loadItems() {
-  var res = await fetch('index.html?v='+Date.now());
+  // Parse menu items from index.html
+  var res = await fetch('index.html?nc=' + Date.now());
   var text = await res.text();
   var doc = new DOMParser().parseFromString(text, 'text/html');
   var photoEls = doc.querySelectorAll('.item-photo[data-item]');
 
-  // Load existing photo URLs from Firestore
+  // Load existing photos from Firestore
   var existing = {};
   try {
     var snap = await fbDb.collection('menu').doc('photos').get();
     if (snap.exists) existing = snap.data();
-  } catch(e) {}
+  } catch(e) { showToast('Could not load photos from Firestore.', true); }
 
-  var grid = document.getElementById('items-grid');
-  if (!photoEls.length) { grid.innerHTML = '<div class="note">No photo slots found.</div>'; return; }
-
-  var cards = [];
+  allItems = [];
   photoEls.forEach(function(el) {
     var slug = el.getAttribute('data-item');
     var item = el.closest('.item');
     var nameEl = item ? item.querySelector('.item-name') : null;
     var name = nameEl ? nameEl.textContent.trim() : slug;
-    var url = existing[slug] || '';
-    cards.push({slug: slug, name: name, url: url});
+    var val = existing[slug];
+    var photos = Array.isArray(val) ? val : (val ? [val] : []);
+    allItems.push({ slug: slug, name: name, photos: photos.slice() });
   });
 
-  grid.innerHTML = cards.map(function(c) {
-    var thumb = c.url
-      ? '<img src="'+esc(c.url)+'" alt="" onerror="this.style.display='none'">'
-      : '<span class="thumb-empty"></span>';
-    return '<div class="card">'
-      + '<div class="thumb" id="th-'+c.slug+'">'+thumb+'</div>'
-      + '<div class="info">'
-      + '<div class="item-name">'+esc(c.name)+'</div>'
-      + '<input type="url" class="url-input" data-slug="'+c.slug+'" value="'+esc(c.url)+'" placeholder="Paste photo URL..." oninput="previewUrl(this)">'
-      + '</div></div>';
-  }).join('');
+  renderItems(allItems);
+  document.getElementById('loading-note') && document.getElementById('loading-note').remove();
 }
 
-function previewUrl(input) {
-  var slug = input.getAttribute('data-slug');
-  var url = input.value.trim();
-  var th = document.getElementById('th-'+slug);
-  if (!th) return;
-  th.innerHTML = url ? '<img src="'+esc(url)+'" alt="" onerror="this.style.display='none'">' : '<span class="thumb-empty"></span>';
-}
-
-async function saveAll() {
-  if (!connected) return;
-  var btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = 'Saving…';
-  var data = {};
-  document.querySelectorAll('.url-input').forEach(function(inp) {
-    var url = inp.value.trim();
-    if (url) data[inp.getAttribute('data-slug')] = url;
+// ── Render item cards ─────────────────────────────────────────────
+function renderItems(items) {
+  var list = document.getElementById('items-list');
+  list.innerHTML = '';
+  if (!items.length) {
+    list.innerHTML = '<div class="note">No items found.</div>';
+    return;
+  }
+  items.forEach(function(item) {
+    var card = document.createElement('div');
+    card.className = 'item-card';
+    card.id = 'card-' + item.slug;
+    card.innerHTML = buildCard(item);
+    list.appendChild(card);
+    card.querySelector('.item-head').addEventListener('click', function() {
+      toggleCard(item.slug);
+    });
   });
-  try {
-    await fbDb.collection('menu').doc('photos').set(data);
-    var n = Object.keys(data).length;
-    showToast(n + ' photo'+(n===1?'':'s')+' saved. Live now for everyone!');
-  } catch(e) { showToast(e.message, true); }
-  btn.disabled = false; btn.textContent = 'Save All Changes';
 }
 
+function buildCard(item) {
+  var firstPhoto = item.photos[0] || '';
+  var thumb = firstPhoto
+    ? '<img src="' + esc(firstPhoto) + '" alt="" onerror="this.style.display=\'none\'">'
+    : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(70% 0.02 37)" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+  var countBadge = item.photos.length > 1 ? '<span class="item-thumb-count">' + item.photos.length + '</span>' : '';
+
+  return '<div class="item-head">'
+    + '<div class="item-thumb" id="thumb-' + item.slug + '">' + thumb + countBadge + '</div>'
+    + '<div class="item-info">'
+    + '<div class="item-name">' + esc(item.name) + '</div>'
+    + '<div class="item-meta">' + item.photos.length + ' / 5 photos</div>'
+    + '</div>'
+    + '<span class="item-chevron">›</span>'
+    + '</div>'
+    + '<div class="item-editor" id="editor-' + item.slug + '">'
+    + buildEditor(item)
+    + '</div>';
+}
+
+function buildEditor(item) {
+  var slots = '';
+  item.photos.forEach(function(url, i) {
+    slots += '<div class="photo-slot" data-slug="' + item.slug + '" data-idx="' + i + '">'
+      + '<img src="' + esc(url) + '" alt="" onerror="this.parentElement.classList.add(\'slot-broken\')">'
+      + '<button class="slot-remove" onclick="removePhoto(\'' + item.slug + '\',' + i + ');event.stopPropagation()">&times;</button>'
+      + '</div>';
+  });
+  if (item.photos.length < 5) {
+    slots += '<div class="photo-slot slot-add" onclick="openAddPanel(\'' + item.slug + '\')">'
+      + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+      + '<span>Add</span></div>';
+  }
+
+  return '<div class="photos-grid" id="grid-' + item.slug + '">' + slots + '</div>'
+    + '<div class="photos-hint" id="hint-' + item.slug + '">' + item.photos.length + ' / 5 photos</div>'
+    + '<div class="add-panel" id="addpanel-' + item.slug + '">'
+    + '<div class="add-preview" id="preview-' + item.slug + '">No photo selected yet</div>'
+    + '<div class="progress-bar" id="progress-' + item.slug + '"><div class="progress-fill" id="progressfill-' + item.slug + '"></div></div>'
+    + '<div class="add-row">'
+    + '<button class="btn" onclick="triggerFile(\'' + item.slug + '\')">Choose photo</button>'
+    + '<input class="url-inp" id="urlinp-' + item.slug + '" type="url" placeholder="…or paste image URL" oninput="previewUrlInput(\'' + item.slug + '\',this.value)">'
+    + '</div>'
+    + '<div class="add-actions">'
+    + '<button class="btn btn-primary" id="addbtn-' + item.slug + '" onclick="addPhoto(\'' + item.slug + '\')">Add this photo</button>'
+    + '<button class="btn" onclick="closeAddPanel(\'' + item.slug + '\')">Cancel</button>'
+    + '</div>'
+    + '</div>';
+}
+
+// ── Toggle card open/close ────────────────────────────────────────
+function toggleCard(slug) {
+  var card = document.getElementById('card-' + slug);
+  var isOpen = card.classList.contains('open');
+  // Close all others
+  document.querySelectorAll('.item-card.open').forEach(function(c) { c.classList.remove('open'); });
+  if (!isOpen) { card.classList.add('open'); activeSlug = slug; }
+  else { activeSlug = null; }
+  pendingFile = null; pendingUrl = null;
+}
+
+// ── File pick ────────────────────────────────────────────────────
+var fileTargetSlug = null;
+function triggerFile(slug) {
+  fileTargetSlug = slug;
+  document.getElementById('global-file-input').value = '';
+  document.getElementById('global-file-input').click();
+}
+document.getElementById('global-file-input').addEventListener('change', function() {
+  var file = this.files[0]; if (!file || !fileTargetSlug) return;
+  var slug = fileTargetSlug;
+  pendingFile = file; pendingUrl = null;
+  document.getElementById('urlinp-' + slug).value = '';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var prev = document.getElementById('preview-' + slug);
+    prev.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover">';
+  };
+  reader.readAsDataURL(file);
+});
+
+// ── URL paste preview ─────────────────────────────────────────────
+var urlTimers = {};
+function previewUrlInput(slug, val) {
+  clearTimeout(urlTimers[slug]);
+  if (!val.trim()) { pendingUrl = null; pendingFile = null; document.getElementById('preview-' + slug).innerHTML = 'No photo selected yet'; return; }
+  urlTimers[slug] = setTimeout(function() {
+    var img = new Image();
+    img.onload = function() {
+      pendingUrl = val.trim(); pendingFile = null;
+      document.getElementById('preview-' + slug).innerHTML = '<img src="' + esc(val) + '" style="width:100%;height:100%;object-fit:cover">';
+    };
+    img.onerror = function() {
+      document.getElementById('preview-' + slug).innerHTML = '<span style="font-size:.75rem;color:var(--terracotta)">Could not load this URL</span>';
+    };
+    img.src = val.trim();
+  }, 500);
+}
+
+// ── Add panel show/hide ───────────────────────────────────────────
+function openAddPanel(slug) {
+  pendingFile = null; pendingUrl = null;
+  document.getElementById('urlinp-' + slug).value = '';
+  document.getElementById('preview-' + slug).innerHTML = 'No photo selected yet';
+  document.getElementById('addpanel-' + slug).classList.add('visible');
+}
+function closeAddPanel(slug) {
+  document.getElementById('addpanel-' + slug).classList.remove('visible');
+  pendingFile = null; pendingUrl = null;
+}
+
+// ── Add photo ────────────────────────────────────────────────────
+function addPhoto(slug) {
+  if (!pendingFile && !pendingUrl) { showToast('Choose a photo first.', true); return; }
+  var item = allItems.find(function(i) { return i.slug === slug; });
+  if (!item) return;
+  if (item.photos.length >= 5) { showToast('Max 5 photos per item.', true); return; }
+
+  var btn = document.getElementById('addbtn-' + slug);
+  btn.disabled = true; btn.textContent = 'Uploading…';
+
+  if (pendingFile) {
+    var ext = (pendingFile.name.split('.').pop() || 'jpg').toLowerCase().replace('jpeg','jpg');
+    var ref = fbStorage.ref('menu-photos/' + slug + '_' + Date.now() + '.' + ext);
+    var task = ref.put(pendingFile);
+
+    // Show progress
+    var progBar  = document.getElementById('progress-' + slug);
+    var progFill = document.getElementById('progressfill-' + slug);
+    progBar.classList.add('visible');
+
+    task.on('state_changed',
+      function(snap) {
+        var pct = (snap.bytesTransferred / snap.totalBytes) * 100;
+        progFill.style.width = pct + '%';
+      },
+      function(err) {
+        showToast(err.message || 'Upload failed.', true);
+        btn.disabled = false; btn.textContent = 'Add this photo';
+        progBar.classList.remove('visible');
+      },
+      function() {
+        ref.getDownloadURL().then(function(url) {
+          item.photos.push(url);
+          saveToFirestore(slug, item.photos, function() {
+            refreshCard(item);
+            closeAddPanel(slug);
+            btn.disabled = false; btn.textContent = 'Add this photo';
+            progBar.classList.remove('visible'); progFill.style.width = '0%';
+            showToast('Photo saved!');
+          });
+        });
+      }
+    );
+  } else {
+    item.photos.push(pendingUrl);
+    saveToFirestore(slug, item.photos, function() {
+      refreshCard(item);
+      closeAddPanel(slug);
+      btn.disabled = false; btn.textContent = 'Add this photo';
+      showToast('Photo saved!');
+    });
+  }
+}
+
+// ── Remove photo ──────────────────────────────────────────────────
+function removePhoto(slug, idx) {
+  var item = allItems.find(function(i) { return i.slug === slug; });
+  if (!item) return;
+  if (!confirm('Remove this photo?')) return;
+  item.photos.splice(idx, 1);
+  saveToFirestore(slug, item.photos, function() {
+    refreshCard(item);
+    showToast('Photo removed.');
+  });
+}
+
+// ── Save to Firestore ─────────────────────────────────────────────
+function saveToFirestore(slug, photos, cb) {
+  var update = {};
+  update[slug] = photos;
+  fbDb.collection('menu').doc('photos').set(update, { merge: true })
+    .then(function() { if (cb) cb(); })
+    .catch(function(e) { showToast(e.message || 'Save failed.', true); });
+}
+
+// ── Refresh one card in place ─────────────────────────────────────
+function refreshCard(item) {
+  var card = document.getElementById('card-' + item.slug);
+  if (!card) return;
+  var wasOpen = card.classList.contains('open');
+  card.innerHTML = buildCard(item);
+  if (wasOpen) {
+    card.classList.add('open');
+    card.querySelector('.item-head').addEventListener('click', function() { toggleCard(item.slug); });
+  } else {
+    card.querySelector('.item-head').addEventListener('click', function() { toggleCard(item.slug); });
+  }
+}
+
+// ── Search filter ─────────────────────────────────────────────────
+function filterItems(q) {
+  var filtered = allItems.filter(function(i) {
+    return i.name.toLowerCase().includes(q.toLowerCase());
+  });
+  renderItems(filtered);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function showToast(msg, isErr) {
   var t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast'+(isErr?' err':'')+' show';
-  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.className='toast'; }, 4000);
+  t.textContent = msg;
+  t.className = 'toast' + (isErr ? ' err' : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.className = 'toast'; }, 4000);
 }
 </script>
 </body>
