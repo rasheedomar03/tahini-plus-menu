@@ -616,150 +616,6 @@ body {
   * { transition-duration: 0ms !important; }
 }
 
-/* ─── Photo editor modal ─────────────────── */
-.pe-overlay {
-  position: fixed; inset: 0;
-  background: oklch(10% 0.005 75 / 0.55);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 9000;
-  padding: 1rem;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.18s;
-}
-.pe-overlay.open { opacity: 1; pointer-events: auto; }
-.pe-panel {
-  background: var(--surface);
-  border-radius: 14px;
-  width: 100%;
-  max-width: 400px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px oklch(15% 0.005 75 / 0.3);
-  transform: translateY(12px);
-  transition: transform 0.18s var(--ease-out);
-}
-.pe-overlay.open .pe-panel { transform: translateY(0); }
-.pe-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 1rem 1.25rem 0.75rem;
-  border-bottom: 1px solid var(--border);
-}
-.pe-title {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 400;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 280px;
-}
-.pe-close {
-  background: none; border: none; cursor: pointer;
-  color: var(--ink-muted); font-size: 1.3rem; line-height: 1;
-  padding: 0.1rem 0.3rem; border-radius: 4px;
-  transition: color 0.1s;
-}
-.pe-close:hover { color: var(--ink); }
-.pe-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
-.pe-preview {
-  width: 100%; aspect-ratio: 4/3;
-  border-radius: 10px;
-  background: oklch(95% 0.009 37);
-  border: 1.5px dashed oklch(80% 0.028 37);
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-}
-.pe-preview img { width:100%; height:100%; object-fit:cover; display:block; }
-.pe-drop-zone {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0.5rem; padding: 1rem; cursor: pointer;
-}
-.pe-drop-zone svg { opacity: 0.4; }
-.pe-drop-label { font-size: 0.8rem; color: var(--ink-muted); text-align: center; }
-.pe-drop-btn {
-  padding: 0.45rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  background: var(--canvas);
-  color: var(--ink);
-  cursor: pointer;
-  transition: border-color 0.1s;
-}
-.pe-drop-btn:hover { border-color: var(--terracotta); }
-.pe-or {
-  display: flex; align-items: center; gap: 0.75rem;
-  font-size: 0.75rem; color: var(--ink-subtle);
-}
-.pe-or::before, .pe-or::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-.pe-url {
-  width: 100%;
-  padding: 0.6rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  background: var(--canvas);
-  color: var(--ink);
-  outline: none;
-}
-.pe-url:focus { border-color: var(--terracotta); }
-.pe-setup-box {
-  display: flex; flex-direction: column; gap: 0.6rem;
-  padding: 0.875rem; background: oklch(97% 0.008 82);
-  border: 1px solid var(--border); border-radius: 8px;
-  font-size: 0.78rem; color: var(--ink-muted); line-height: 1.5;
-}
-.pe-setup-box a { color: var(--terracotta); }
-.pe-setup-title { font-weight: 500; font-size: 0.85rem; color: var(--ink); }
-.pe-setup-steps { padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; }
-.pe-setup-steps code { background: var(--border); padding: .1em .3em; border-radius: 3px; font-size:.85em; }
-.pe-config-area {
-  width: 100%; height: 68px; resize: vertical;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border); border-radius: 7px;
-  font-family: monospace; font-size: 0.72rem;
-  background: var(--surface); color: var(--ink); outline: none;
-}
-.pe-config-area:focus { border-color: var(--terracotta); }
-.pe-foot {
-  display: flex; gap: 0.75rem; justify-content: flex-end;
-  padding: 0.75rem 1.25rem 1.25rem;
-  border-top: 1px solid var(--border);
-}
-.pe-btn {
-  padding: 0.55rem 1.25rem;
-  border-radius: 8px;
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--canvas);
-  color: var(--ink);
-  transition: opacity 0.15s;
-}
-.pe-btn:hover { opacity: 0.8; }
-.pe-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.pe-btn-primary {
-  background: var(--terracotta);
-  border-color: var(--terracotta);
-  color: #fff;
-}
-.pe-toast {
-  position: fixed; bottom: 1.5rem; left: 50%;
-  transform: translateX(-50%) translateY(120%);
-  background: var(--ink); color: #fff;
-  padding: 0.6rem 1.2rem; border-radius: 8px;
-  font-size: 0.85rem; z-index: 9999;
-  transition: transform 0.22s ease;
-}
-.pe-toast.show { transform: translateX(-50%) translateY(0); }
-.pe-toast.err   { background: oklch(40% 0.12 37); }
-
 /* ─── Lightbox ───────────────────────────── */
 .lb-overlay {
   position: fixed; inset: 0; z-index: 10000;
@@ -816,54 +672,31 @@ body {
 }
 .lb-edit:hover { background: oklch(98% 0.003 75 / 0.28); }
 
-/* ─── Multi-photo editor grid ────────────── */
-.pe-photos-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.5rem;
+
+.admin-link {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 2;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--ink-subtle);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.35rem 0.75rem;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
 }
-.pe-photo-slot {
-  aspect-ratio: 1;
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
-  border: 1.5px dashed oklch(80% 0.028 37);
-  background: oklch(95.5% 0.009 37);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.pe-photo-slot img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-.pe-photo-slot .pe-slot-remove {
-  position: absolute; top: 2px; right: 2px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: oklch(20% 0.006 75 / 0.7); color: #fff;
-  border: none; font-size: 0.8rem; line-height: 1;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-}
-.pe-photo-slot.pe-slot-add {
-  flex-direction: column; gap: 0.2rem;
-  font-size: 0.6rem; color: var(--ink-muted);
-  transition: border-color 0.15s;
-}
-.pe-photo-slot.pe-slot-add:hover { border-color: var(--terracotta); }
-.pe-photo-slot.pe-slot-add svg { opacity: 0.5; }
-.pe-photos-hint {
-  font-size: 0.72rem; color: var(--ink-muted); text-align: center;
-}
-.pe-add-area {
-  display: flex; flex-direction: column; gap: 0.75rem;
-  padding: 0.875rem; background: oklch(97.5% 0.006 82);
-  border: 1px solid var(--border); border-radius: 10px;
-}
-.pe-add-area.hidden { display: none; }
+.admin-link:hover { color: var(--terracotta); border-color: var(--terracotta); }
 </style>
 </head>
 <body>
 
 <!-- ── HEADER ───────────────────────────── -->
 <header class="site-header">
+  <a href="admin.html" class="admin-link">Admin</a>
   <div class="header-inner">
     <div class="logo-wrap">
       <img src="logo.png" alt="Tahini Plus Halal Kitchen logo">
@@ -1544,12 +1377,18 @@ body {
 })();
 
 
-/* ── Load food photos from Firebase ── */
+/* ── Load food photos from Firebase (read-only) ── */
+var FB_CONFIG = {
+  apiKey: "AIzaSyCrI-gYB4uoKnJbTlYA0bpwFwDP7RwFues",
+  authDomain: "tahini-plus-aae1d.firebaseapp.com",
+  projectId: "tahini-plus-aae1d",
+  storageBucket: "tahini-plus-aae1d.firebasestorage.app",
+  messagingSenderId: "757729545275",
+  appId: "1:757729545275:web:4db73fe81bfe458afae01e"
+};
 (function() {
-  var cfg = JSON.parse(localStorage.getItem('tahini-firebase-config') || 'null');
-  if (!cfg) return;
   try {
-    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
     firebase.firestore().collection('menu').doc('photos').get().then(function(doc) {
       if (!doc.exists) return;
       var data = doc.data();
@@ -1568,37 +1407,11 @@ body {
   } catch(e) {}
 })();
 
-/* ── Photo editor + Lightbox — Firebase ── */
+/* ── Lightbox (view-only; editing happens on admin.html) ── */
 document.addEventListener('DOMContentLoaded', function() {
 (function() {
-  var FB_KEY = 'tahini-firebase-config';
-  var fbApp = null, fbDb = null, fbStorage = null;
-
-  // photosMap: slug → string[] (loaded on page start, kept in sync after edits)
   window._photosMap = window._photosMap || {};
   var photosMap = window._photosMap;
-
-  // ── Editor state ──────────────────────────
-  var currentSlug = null, currentEl = null;
-  var currentPhotos = []; // working copy while editor is open
-  var pendingFile = null, pendingUrl = null;
-  var addingSlotIndex = -1; // which empty slot is being filled
-
-  // ── DOM refs ─────────────────────────────
-  var overlay    = document.getElementById('pe-overlay');
-  var titleEl    = document.getElementById('pe-title');
-  var photosGrid = document.getElementById('pe-photos-grid');
-  var addArea    = document.getElementById('pe-add-area');
-  var fileInput  = document.getElementById('pe-file-input');
-  var urlInput   = document.getElementById('pe-url-input');
-  var addPreview = document.getElementById('pe-add-preview');
-  var setupBox   = document.getElementById('pe-setup-box');
-  var configArea = document.getElementById('pe-firebase-config');
-  var saveBtn    = document.getElementById('pe-save-btn');
-  var cancelBtn  = document.getElementById('pe-cancel-btn');
-  var closeBtn   = document.getElementById('pe-close');
-  var toast      = document.getElementById('pe-toast');
-  var toastTimer;
 
   // ── Lightbox refs ─────────────────────────
   var lbOverlay = document.getElementById('lb-overlay');
@@ -1610,29 +1423,12 @@ document.addEventListener('DOMContentLoaded', function() {
   var lbEdit    = document.getElementById('lb-edit');
   var lbSlug = null, lbPhotos = [], lbIndex = 0;
 
-  // ── Firebase init ─────────────────────────
-  function initFb(cfg) {
-    if (fbApp) return true;
-    try {
-      fbApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(cfg);
-      fbDb = firebase.firestore();
-      fbStorage = firebase.storage();
-      return true;
-    } catch(e) { return false; }
-  }
-  var saved = JSON.parse(localStorage.getItem(FB_KEY) || 'null');
-  if (saved) initFb(saved);
-
   // ── Wire up photo placeholders ────────────
   document.querySelectorAll('.item-photo').forEach(function(el) {
     el.addEventListener('click', function() {
       var slug = el.getAttribute('data-item');
       var photos = photosMap[slug] || [];
-      if (photos.length > 0) {
-        openLightbox(slug, 0);
-      } else {
-        openEditor(el);
-      }
+      if (photos.length > 0) openLightbox(slug, 0);
     });
   });
 
@@ -1662,9 +1458,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   lbClose.addEventListener('click', closeLightbox);
   lbEdit.addEventListener('click', function() {
-    closeLightbox();
-    var el = document.querySelector('.item-photo[data-item="'+lbSlug+'"]');
-    if (el) openEditor(el);
+    window.location.href = 'admin.html';
   });
   lbOverlay.addEventListener('click', function(e) {
     if (e.target === lbOverlay) closeLightbox();
@@ -1677,206 +1471,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function closeLightbox() { lbOverlay.classList.remove('open'); }
-
-  // ─────────────────────────────────────────
-  // EDITOR
-  // ─────────────────────────────────────────
-  function openEditor(el) {
-    currentEl   = el;
-    currentSlug = el.getAttribute('data-item');
-    currentPhotos = (photosMap[currentSlug] || []).slice();
-    pendingFile = null; pendingUrl = null; addingSlotIndex = -1;
-
-    var item   = el.closest('.item');
-    var nameEl = item ? item.querySelector('.item-name') : null;
-    titleEl.textContent = 'Edit Photos' + (nameEl ? ' · ' + nameEl.textContent.trim().slice(0, 24) : '');
-
-    setupBox.style.display = localStorage.getItem(FB_KEY) ? 'none' : '';
-    renderGrid();
-    hideAddArea();
-    overlay.classList.add('open');
-  }
-
-  function renderGrid() {
-    photosGrid.innerHTML = '';
-    currentPhotos.forEach(function(url, i) {
-      var slot = document.createElement('div');
-      slot.className = 'pe-photo-slot';
-      slot.innerHTML = '<img src="'+url+'" alt="">'
-        + '<button class="pe-slot-remove" data-idx="'+i+'" title="Remove">&times;</button>';
-      photosGrid.appendChild(slot);
-    });
-    if (currentPhotos.length < 5) {
-      var add = document.createElement('div');
-      add.className = 'pe-photo-slot pe-slot-add';
-      add.dataset.addSlot = 'true';
-      add.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add</span>';
-      photosGrid.appendChild(add);
-    }
-    // hint
-    document.getElementById('pe-photos-hint').textContent =
-      currentPhotos.length + ' / 5 photos added';
-  }
-
-  // Delegate clicks in the grid
-  photosGrid.addEventListener('click', function(e) {
-    var removeBtn = e.target.closest('.pe-slot-remove');
-    if (removeBtn) {
-      var idx = parseInt(removeBtn.getAttribute('data-idx'), 10);
-      currentPhotos.splice(idx, 1);
-      renderGrid();
-      // Update thumbnail if first photo changed
-      updateThumbnail();
-      hideAddArea();
-      return;
-    }
-    var addSlot = e.target.closest('[data-add-slot]');
-    if (addSlot) {
-      pendingFile = null; pendingUrl = null;
-      urlInput.value = '';
-      addPreview.innerHTML = '';
-      addArea.classList.remove('hidden');
-      fileInput.value = '';
-    }
-  });
-
-  function hideAddArea() { addArea.classList.add('hidden'); }
-
-  function updateThumbnail() {
-    if (!currentEl) return;
-    if (currentPhotos.length > 0) {
-      currentEl.innerHTML = '<img src="'+currentPhotos[0]+'" alt="" style="width:100%;height:100%;object-fit:cover">';
-    } else {
-      currentEl.innerHTML = '';
-    }
-  }
-
-  // File pick
-  fileInput.addEventListener('change', function() {
-    var file = fileInput.files[0]; if (!file) return;
-    pendingFile = file; pendingUrl = null; urlInput.value = '';
-    var r = new FileReader();
-    r.onload = function(ev) {
-      addPreview.innerHTML = '<img src="'+ev.target.result+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">';
-    };
-    r.readAsDataURL(file);
-  });
-
-  // Drop onto add area
-  addArea.addEventListener('dragover', function(e) { e.preventDefault(); });
-  addArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    var file = e.dataTransfer.files[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    pendingFile = file; pendingUrl = null; urlInput.value = '';
-    var r = new FileReader();
-    r.onload = function(ev) {
-      addPreview.innerHTML = '<img src="'+ev.target.result+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">';
-    };
-    r.readAsDataURL(file);
-  });
-
-  // Choose button
-  document.addEventListener('click', function(e) {
-    if (e.target.id === 'pe-choose-btn') fileInput.click();
-  });
-
-  // URL preview
-  var urlTimer;
-  urlInput.addEventListener('input', function() {
-    clearTimeout(urlTimer);
-    var url = urlInput.value.trim();
-    if (!url) { pendingUrl = null; addPreview.innerHTML = ''; return; }
-    urlTimer = setTimeout(function() {
-      var img = new Image();
-      img.onload = function() {
-        pendingUrl = url; pendingFile = null;
-        addPreview.innerHTML = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">';
-      };
-      img.onerror = function() { pendingUrl = null; addPreview.innerHTML = '<p style="font-size:.75rem;color:var(--terracotta);padding:.5rem">Could not load this URL</p>'; };
-      img.src = url;
-    }, 500);
-  });
-
-  // "Add this photo" button in add area
-  document.getElementById('pe-add-photo-btn').addEventListener('click', function() {
-    if (!pendingFile && !pendingUrl) { showToast('Choose a photo first.', true); return; }
-    if (currentPhotos.length >= 5) { showToast('Max 5 photos per item.', true); return; }
-
-    if (pendingFile) {
-      // Upload to Storage then add URL
-      var btn = document.getElementById('pe-add-photo-btn');
-      btn.disabled = true; btn.textContent = 'Uploading…';
-      var ext = (pendingFile.name.split('.').pop() || 'jpg').toLowerCase().replace('jpeg','jpg');
-      var ref = fbStorage.ref('menu-photos/' + currentSlug + '_' + Date.now() + '.' + ext);
-      ref.put(pendingFile)
-        .then(function() { return ref.getDownloadURL(); })
-        .then(function(url) {
-          currentPhotos.push(url);
-          renderGrid();
-          updateThumbnail();
-          hideAddArea();
-          btn.disabled = false; btn.textContent = 'Add this photo';
-        })
-        .catch(function(e) { showToast(e.message || 'Upload failed.', true); btn.disabled = false; btn.textContent = 'Add this photo'; });
-    } else {
-      currentPhotos.push(pendingUrl);
-      renderGrid();
-      updateThumbnail();
-      hideAddArea();
-    }
-  });
-
-  // Save all to Firestore
-  saveBtn.addEventListener('click', function() {
-    // First-time Firebase setup
-    if (!localStorage.getItem(FB_KEY)) {
-      var raw = (configArea.value || '').trim();
-      if (!raw) { showToast('Paste your Firebase config first.', true); configArea.focus(); return; }
-      var cfg;
-      try {
-        var json = raw.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
-        cfg = JSON.parse(json);
-        if (!cfg.apiKey || !cfg.projectId) throw new Error('missing fields');
-      } catch(e) { showToast('Invalid config — paste just the { ... } object.', true); return; }
-      if (!initFb(cfg)) { showToast('Could not connect to Firebase.', true); return; }
-      localStorage.setItem(FB_KEY, JSON.stringify(cfg));
-      setupBox.style.display = 'none';
-    }
-
-    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
-    var update = {};
-    update[currentSlug] = currentPhotos;
-    fbDb.collection('menu').doc('photos').set(update, { merge: true })
-      .then(function() {
-        photosMap[currentSlug] = currentPhotos.slice();
-        updateThumbnail();
-        showToast(currentPhotos.length ? 'Photos saved!' : 'Photos cleared.');
-        closeEditor();
-        saveBtn.disabled = false; saveBtn.textContent = 'Save';
-      })
-      .catch(function(e) { showToast(e.message || 'Save failed.', true); saveBtn.disabled = false; saveBtn.textContent = 'Save'; });
-  });
-
-  function closeEditor() {
-    overlay.classList.remove('open');
-    currentEl = null; currentSlug = null; currentPhotos = [];
-    pendingFile = null; pendingUrl = null;
-  }
-
-  closeBtn.addEventListener('click', closeEditor);
-  cancelBtn.addEventListener('click', closeEditor);
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeEditor(); });
-  document.addEventListener('keydown', function(e) {
-    if (overlay.classList.contains('open') && e.key === 'Escape') closeEditor();
-  });
-
-  function showToast(msg, isErr) {
-    toast.textContent = msg;
-    toast.className = 'pe-toast' + (isErr ? ' err' : '') + ' show';
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function() { toast.className = 'pe-toast'; }, 4000);
-  }
 })();
 }); // DOMContentLoaded
 </script>
@@ -1890,49 +1484,6 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="lb-counter" id="lb-counter">1 / 1</div>
   <button class="lb-edit" id="lb-edit">Edit photos</button>
 </div>
-
-<!-- Photo editor modal -->
-<div class="pe-overlay" id="pe-overlay" role="dialog" aria-modal="true">
-  <div class="pe-panel">
-    <div class="pe-head">
-      <div class="pe-title" id="pe-title">Edit Photos</div>
-      <button class="pe-close" id="pe-close" aria-label="Close">&times;</button>
-    </div>
-    <div class="pe-body">
-      <!-- Current photos grid -->
-      <div class="pe-photos-grid" id="pe-photos-grid"></div>
-      <p class="pe-photos-hint" id="pe-photos-hint">0 / 5 photos added</p>
-
-      <!-- Add new photo area (hidden until + slot clicked) -->
-      <div class="pe-add-area hidden" id="pe-add-area">
-        <div class="pe-preview" id="pe-add-preview" style="min-height:80px;border-radius:8px;background:oklch(95% 0.009 37);border:1.5px dashed oklch(80% 0.028 37);display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
-        <div style="display:flex;gap:.5rem;align-items:center;">
-          <button class="pe-drop-btn" id="pe-choose-btn" style="flex:1">Choose from device</button>
-          <div class="pe-or" style="width:2rem;flex-shrink:0">or</div>
-          <input class="pe-url" id="pe-url-input" type="url" placeholder="Paste image URL" style="flex:2">
-        </div>
-        <input type="file" id="pe-file-input" accept="image/*" style="display:none">
-        <button class="pe-btn pe-btn-primary" id="pe-add-photo-btn" style="width:100%">Add this photo</button>
-      </div>
-
-      <div class="pe-setup-box" id="pe-setup-box">
-        <div class="pe-setup-title">One-time Firebase Setup</div>
-        <ol class="pe-setup-steps">
-          <li>Create a free project at <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a></li>
-          <li>Add a <strong>Web app</strong> &rarr; copy the <code>firebaseConfig</code> object</li>
-          <li>Enable <strong>Firestore Database</strong> and <strong>Storage</strong></li>
-          <li>Set both rules to: <code>allow read, write: if true;</code></li>
-        </ol>
-        <textarea id="pe-firebase-config" class="pe-config-area" placeholder='{"apiKey":"AIza...","projectId":"your-app","storageBucket":"your-app.appspot.com",...}'></textarea>
-      </div>
-    </div>
-    <div class="pe-foot">
-      <button class="pe-btn" id="pe-cancel-btn">Cancel</button>
-      <button class="pe-btn pe-btn-primary" id="pe-save-btn">Save</button>
-    </div>
-  </div>
-</div>
-<div class="pe-toast" id="pe-toast"></div>
 
 </body>
 </html>
