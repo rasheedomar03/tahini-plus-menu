@@ -588,6 +588,12 @@ body {
   border-color: var(--terracotta);
   box-shadow: 0 0 0 3px oklch(53% 0.108 37 / 0.12);
 }
+.item-photo:has(> img) {
+  border: 1px solid var(--ink);
+}
+.item-photo:has(> img):hover {
+  border-color: var(--terracotta);
+}
 .item-photo:not(:has(> img))::after {
   content: '';
   display: block;
