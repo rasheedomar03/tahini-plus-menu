@@ -192,11 +192,12 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
 }
 .add-panel.visible { display: flex; }
 .add-preview {
-  width: 100%; height: 80px; border-radius: 8px;
+  width: 140px; max-width: 100%; aspect-ratio: 1; border-radius: 8px;
   background: oklch(95% 0.009 37);
   border: 1.5px dashed oklch(80% 0.028 37);
   overflow: hidden; display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; color: var(--ink-subtle);
+  font-size: 0.75rem; color: var(--ink-subtle); text-align: center;
+  margin: 0 auto;
 }
 .add-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .add-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
