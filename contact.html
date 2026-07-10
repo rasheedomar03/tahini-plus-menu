@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#f5efe6">
-<title>Tahini Plus · Halal Kitchen</title>
+<title>Contact · Tahini Plus Halal Kitchen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -333,6 +333,50 @@ a { color: inherit; }
   margin-bottom: var(--space-6);
 }
 
+/* ─── Contact cards ───────────────────────── */
+.contact-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 480px;
+  margin: 0 auto var(--space-10);
+}
+
+.contact-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.contact-card:hover { border-color: var(--terracotta); }
+
+.contact-card-icon {
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--halal-bg);
+  color: var(--halal-text);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.contact-card-label { font-size: 0.75rem; color: var(--ink-subtle); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.1rem; }
+.contact-card-value { font-size: 0.98rem; font-weight: 500; color: var(--ink); }
+
+.map-embed {
+  max-width: 720px;
+  margin: 0 auto var(--space-12);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.map-embed iframe { display: block; width: 100%; height: 320px; border: 0; }
+
 /* ─── Footer ──────────────────────────────── */
 .site-footer {
   background: oklch(24% 0.01 75);
@@ -379,10 +423,10 @@ a { color: inherit; }
 <nav class="site-nav">
   <a href="index.html" class="site-nav-logo">Tahini <em>Plus</em></a>
   <div class="site-nav-links">
-    <a href="index.html" class="site-nav-link active">Home</a>
+    <a href="index.html" class="site-nav-link">Home</a>
     <a href="menu.html" class="site-nav-link">Menu</a>
     <a href="about.html" class="site-nav-link">About</a>
-    <a href="contact.html" class="site-nav-link">Contact</a>
+    <a href="contact.html" class="site-nav-link active">Contact</a>
   </div>
 </nav>
 
@@ -392,50 +436,56 @@ a { color: inherit; }
     <div class="logo-wrap">
       <img src="logo.png" alt="Tahini Plus Halal Kitchen logo">
     </div>
-    <p class="site-tagline">"Tradition Served Beautifully."</p>
+    <p class="site-tagline">Visit Us</p>
     <div class="header-ornament"><span>✦ ✦ ✦</span></div>
-    <p class="site-desc">Authentic Mediterranean &amp; Middle Eastern cuisine, prepared with care, passion, and halal-certified ingredients.</p>
-    <div class="header-chips">
-      <span class="info-chip">
-        <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A5.5 5.5 0 1 0 13.5 7 5.507 5.507 0 0 0 8 1.5zm0 10A4.5 4.5 0 1 1 12.5 7 4.505 4.505 0 0 1 8 11.5zm.75-4.5V4.5a.75.75 0 0 0-1.5 0v3a.75.75 0 0 0 .22.53l2 2a.75.75 0 1 0 1.06-1.06z" fill="currentColor"/></svg>
-        Mon–Sun · 9am – 9pm
-      </span>
-      <span class="info-chip">
-        <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 6.5A1.5 1.5 0 1 1 9.5 6 1.5 1.5 0 0 1 8 7.5z" fill="currentColor"/></svg>
-        6802 S Texas 6, Houston, TX 77083
-      </span>
-      <span class="info-chip">
-        <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58z" fill="currentColor"/></svg>
-        (281) 555-0192
-      </span>
-    </div>
-    <span class="halal-badge">Halal Certified</span>
-    <div class="hero-ctas">
-      <a href="menu.html" class="btn-cta btn-cta-primary">View Full Menu</a>
-      <a href="https://www.google.com/maps/dir/?api=1&destination=6802+S+Texas+6%2C+Houston%2C+TX+77083" target="_blank" rel="noopener" class="btn-cta btn-cta-secondary">Get Directions</a>
-    </div>
+    <p class="site-desc">Come dine in, grab takeout, or reach out about catering for your next event.</p>
   </div>
 </header>
 
-<!-- ── ABOUT TEASER ─────────────────────── -->
+<!-- ── CONTACT INFO ──────────────────────── -->
 <div class="page-content">
-  <h2 class="section-title">Rooted in <em>Tradition</em></h2>
-  <p class="section-body">Every dish at Tahini Plus is prepared fresh, using time-honored Mediterranean and Middle Eastern recipes passed down through generations &mdash; served with the same warmth and hospitality you'd find at a family table.</p>
-  <a href="about.html" class="section-link">Read our story &rarr;</a>
-
-  <div class="feature-row">
-    <span class="info-chip">✦ &nbsp;Halal Certified</span>
-    <span class="info-chip">✦ &nbsp;Dine-In</span>
-    <span class="info-chip">✦ &nbsp;Takeout</span>
-    <span class="info-chip">✦ &nbsp;Catering</span>
+  <div class="contact-cards">
+    <a class="contact-card" href="https://www.google.com/maps/dir/?api=1&destination=6802+S+Texas+6%2C+Houston%2C+TX+77083" target="_blank" rel="noopener">
+      <span class="contact-card-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 6.5A1.5 1.5 0 1 1 9.5 6 1.5 1.5 0 0 1 8 7.5z" fill="currentColor"/></svg>
+      </span>
+      <span>
+        <div class="contact-card-label">Address</div>
+        <div class="contact-card-value">6802 S Texas 6, Houston, TX 77083</div>
+      </span>
+    </a>
+    <a class="contact-card" href="tel:+12815550192">
+      <span class="contact-card-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58z" fill="currentColor"/></svg>
+      </span>
+      <span>
+        <div class="contact-card-label">Phone</div>
+        <div class="contact-card-value">(281) 555-0192</div>
+      </span>
+    </a>
+    <div class="contact-card">
+      <span class="contact-card-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A5.5 5.5 0 1 0 13.5 7 5.507 5.507 0 0 0 8 1.5zm0 10A4.5 4.5 0 1 1 12.5 7 4.505 4.505 0 0 1 8 11.5zm.75-4.5V4.5a.75.75 0 0 0-1.5 0v3a.75.75 0 0 0 .22.53l2 2a.75.75 0 1 0 1.06-1.06z" fill="currentColor"/></svg>
+      </span>
+      <span>
+        <div class="contact-card-label">Hours</div>
+        <div class="contact-card-value">Mon&ndash;Sun &middot; 9am &ndash; 9pm</div>
+      </span>
+    </div>
   </div>
-</div>
 
-<!-- ── CTA BANNER ────────────────────────── -->
-<div class="cta-banner">
-  <h2 class="cta-banner-title">Ready to <em>Eat</em>?</h2>
-  <p class="cta-banner-sub">Browse our full menu of appetizers, mains, grills, and more.</p>
-  <a href="menu.html" class="btn-cta btn-cta-primary">View Full Menu</a>
+  <div class="hero-ctas" style="margin-bottom: var(--space-12)">
+    <a href="tel:+12815550192" class="btn-cta btn-cta-primary">Call Now</a>
+    <a href="https://www.google.com/maps/dir/?api=1&destination=6802+S+Texas+6%2C+Houston%2C+TX+77083" target="_blank" rel="noopener" class="btn-cta btn-cta-secondary">Get Directions</a>
+  </div>
+
+  <div class="map-embed">
+    <iframe
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      src="https://www.google.com/maps?q=6802+S+Texas+6,+Houston,+TX+77083&output=embed"
+      title="Tahini Plus location map"></iframe>
+  </div>
 </div>
 
 <!-- ── FOOTER ────────────────────────────── -->
