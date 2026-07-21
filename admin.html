@@ -119,6 +119,12 @@ select.text-inp { appearance: auto; }
 
 /* ── Items list ──────────────────────── */
 .items { max-width: 700px; margin: 0 auto; padding: 0 1.25rem 4rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.category-header {
+  font-family: var(--font-d); font-size: 1rem; font-weight: 400;
+  color: var(--olive); margin: 1.25rem 0 -0.25rem;
+  padding-bottom: 0.35rem; border-bottom: 1px solid var(--border);
+}
+.category-header:first-child { margin-top: 0; }
 
 .item-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -542,7 +548,15 @@ function renderItems(items) {
     list.innerHTML = '<div class="note">No items found.</div>';
     return;
   }
+  var lastCategory = null;
   items.forEach(function(item) {
+    if (item.category !== lastCategory) {
+      lastCategory = item.category;
+      var header = document.createElement('div');
+      header.className = 'category-header';
+      header.textContent = categoryName(item.category);
+      list.appendChild(header);
+    }
     var card = document.createElement('div');
     card.className = 'item-card';
     card.id = 'card-' + item.slug;
@@ -566,7 +580,7 @@ function buildCard(item) {
     : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(70% 0.02 37)" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
   var countBadge = item.photos.length > 1 ? '<span class="item-thumb-count">' + item.photos.length + '</span>' : '';
 
-  var metaBits = [item.photos.length + ' / 5 photos', esc(categoryName(item.category))];
+  var metaBits = [item.photos.length + ' / 5 photos'];
   if (item.hidden) metaBits.push('<span class="hidden-badge">Hidden</span>');
   if (item.isAdded) metaBits.push('<span class="added-badge">New item</span>');
 
