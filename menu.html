@@ -1514,57 +1514,122 @@ var FB_CONFIG = {
   messagingSenderId: "757729545275",
   appId: "1:757729545275:web:4db73fe81bfe458afae01e"
 };
-(function() {
+(async function() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
-    firebase.firestore().collection('menu').doc('photos').get().then(function(doc) {
-      if (!doc.exists) return;
-      var data = doc.data();
-      Object.keys(data).forEach(function(slug) {
-        var val = data[slug];
-        // Support both old string format and new array format
-        var urls = Array.isArray(val) ? val : (val ? [val] : []);
-        if (!urls.length) return;
-        window._photosMap = window._photosMap || {};
-        window._photosMap[slug] = urls;
-        document.querySelectorAll('.item-photo[data-item="'+slug+'"]').forEach(function(el) {
-          el.innerHTML = '<img src="'+urls[0]+'" alt="" style="width:100%;height:100%;object-fit:contain">';
-        });
+    var db = firebase.firestore();
+
+    var results = await Promise.all([
+      db.collection('menu').doc('photos').get().catch(function(){ return null; }),
+      db.collection('menu').doc('text').get().catch(function(){ return null; }),
+      db.collection('menu').doc('structure').get().catch(function(){ return null; })
+    ]);
+    var photosDoc = results[0], textDoc = results[1], structureDoc = results[2];
+    var photosData    = (photosDoc && photosDoc.exists) ? photosDoc.data() : {};
+    var textData      = (textDoc && textDoc.exists) ? textDoc.data() : {};
+    var structureData = (structureDoc && structureDoc.exists) ? structureDoc.data() : {};
+    var hidden = structureData.hidden || {};
+    var added  = structureData.added  || {};
+    var order  = structureData.order  || {};
+
+    // 1) Hide removed items
+    Object.keys(hidden).forEach(function(slug) {
+      if (!hidden[slug]) return;
+      var el = document.querySelector('.item-photo[data-item="'+slug+'"]');
+      var item = el ? el.closest('.item') : null;
+      if (item) item.remove();
+    });
+
+    // 2) Insert newly added items into their category section
+    Object.keys(added).forEach(function(slug) {
+      if (hidden[slug]) return;
+      if (document.querySelector('.item-photo[data-item="'+slug+'"]')) return;
+      var info = added[slug];
+      var section = info.category ? document.getElementById(info.category) : null;
+      if (!section) return;
+
+      var div = document.createElement('div');
+      div.className = 'item';
+
+      var main = document.createElement('div');
+      main.className = 'item-main';
+      var h3 = document.createElement('h3');
+      h3.className = 'item-name';
+      h3.textContent = info.name || '';
+      main.appendChild(h3);
+      if (info.desc) {
+        var p = document.createElement('p');
+        p.className = 'item-desc';
+        p.textContent = info.desc;
+        main.appendChild(p);
+      }
+      div.appendChild(main);
+
+      var photoDiv = document.createElement('div');
+      photoDiv.className = 'item-photo';
+      photoDiv.setAttribute('data-item', slug);
+      div.appendChild(photoDiv);
+
+      var priceDiv = document.createElement('div');
+      priceDiv.className = 'item-price';
+      priceDiv.textContent = info.price || '';
+      div.appendChild(priceDiv);
+
+      section.appendChild(div);
+    });
+
+    // 3) Apply saved item order within each category
+    Object.keys(order).forEach(function(catId) {
+      var section = document.getElementById(catId);
+      if (!section) return;
+      (order[catId] || []).forEach(function(slug) {
+        var el = section.querySelector('.item-photo[data-item="'+slug+'"]');
+        var item = el ? el.closest('.item') : null;
+        if (item) section.appendChild(item);
       });
-    }).catch(function(){});
+    });
 
-    // Description & price overrides (edited via admin.html)
-    firebase.firestore().collection('menu').doc('text').get().then(function(doc) {
-      if (!doc.exists) return;
-      var data = doc.data();
-      Object.keys(data).forEach(function(slug) {
-        var override = data[slug] || {};
-        var photoEl = document.querySelector('.item-photo[data-item="'+slug+'"]');
-        var item = photoEl ? photoEl.closest('.item') : null;
-        if (!item) return;
+    // 4) Photo overlay
+    Object.keys(photosData).forEach(function(slug) {
+      var val = photosData[slug];
+      // Support both old string format and new array format
+      var urls = Array.isArray(val) ? val : (val ? [val] : []);
+      if (!urls.length) return;
+      window._photosMap = window._photosMap || {};
+      window._photosMap[slug] = urls;
+      document.querySelectorAll('.item-photo[data-item="'+slug+'"]').forEach(function(el) {
+        el.innerHTML = '<img src="'+urls[0]+'" alt="" style="width:100%;height:100%;object-fit:contain">';
+      });
+    });
 
-        if (typeof override.desc === 'string') {
-          var descEl = item.querySelector('.item-desc');
-          if (override.desc) {
-            if (!descEl) {
-              descEl = document.createElement('p');
-              descEl.className = 'item-desc';
-              var mainEl = item.querySelector('.item-main');
-              var nameEl = mainEl ? mainEl.querySelector('.item-name') : null;
-              if (mainEl && nameEl) nameEl.insertAdjacentElement('afterend', descEl);
-            }
-            if (descEl) descEl.textContent = override.desc;
-          } else if (descEl) {
-            descEl.remove();
+    // 5) Description & price overrides (edited via admin.html)
+    Object.keys(textData).forEach(function(slug) {
+      var override = textData[slug] || {};
+      var photoEl = document.querySelector('.item-photo[data-item="'+slug+'"]');
+      var item = photoEl ? photoEl.closest('.item') : null;
+      if (!item) return;
+
+      if (typeof override.desc === 'string') {
+        var descEl = item.querySelector('.item-desc');
+        if (override.desc) {
+          if (!descEl) {
+            descEl = document.createElement('p');
+            descEl.className = 'item-desc';
+            var mainEl = item.querySelector('.item-main');
+            var nameEl = mainEl ? mainEl.querySelector('.item-name') : null;
+            if (mainEl && nameEl) nameEl.insertAdjacentElement('afterend', descEl);
           }
+          if (descEl) descEl.textContent = override.desc;
+        } else if (descEl) {
+          descEl.remove();
         }
+      }
 
-        if (typeof override.price === 'string' && override.price) {
-          var priceEl = item.querySelector('.item-price');
-          if (priceEl) priceEl.textContent = override.price;
-        }
-      });
-    }).catch(function(){});
+      if (typeof override.price === 'string' && override.price) {
+        var priceEl = item.querySelector('.item-price');
+        if (priceEl) priceEl.textContent = override.price;
+      }
+    });
   } catch(e) {}
 })();
 

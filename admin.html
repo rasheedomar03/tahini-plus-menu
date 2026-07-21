@@ -98,7 +98,7 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
 }
 
 /* ── Search ──────────────────────────── */
-.search-wrap { padding: 1rem 1.25rem; max-width: 700px; margin: 0 auto; }
+.search-wrap { padding: 1rem 1.25rem; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.6rem; }
 .search-input {
   width: 100%; padding: 0.65rem 1rem;
   border: 1px solid var(--border); border-radius: 8px;
@@ -106,6 +106,16 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
   background: var(--surface); color: var(--ink); outline: none;
 }
 .search-input:focus { border-color: var(--terracotta); }
+
+/* ── Add new item panel ───────────────── */
+.add-item-panel {
+  background: oklch(97.5% 0.006 82);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.875rem; display: none;
+  flex-direction: column; gap: 0.35rem;
+}
+.add-item-panel.visible { display: flex; }
+select.text-inp { appearance: auto; }
 
 /* ── Items list ──────────────────────── */
 .items { max-width: 700px; margin: 0 auto; padding: 0 1.25rem 4rem; display: flex; flex-direction: column; gap: 0.75rem; }
@@ -145,6 +155,27 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
   transition: transform 0.2s;
 }
 .item-card.open .item-chevron { transform: rotate(90deg); }
+.item-head.is-hidden { opacity: 0.55; }
+.hidden-badge, .added-badge {
+  display: inline-block; font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.03em; text-transform: uppercase;
+  padding: 0.05rem 0.35rem; border-radius: 4px; margin-left: 0.15rem;
+}
+.hidden-badge { background: oklch(90% 0.02 37); color: oklch(45% 0.1 37); }
+.added-badge { background: oklch(93% 0.05 145); color: oklch(38% 0.1 145); }
+
+/* ── Reorder / remove buttons ─────────── */
+.item-actions { display: flex; gap: 0.25rem; flex-shrink: 0; }
+.icon-btn {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface); color: var(--ink-muted);
+  font-size: 0.85rem; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.15s, border-color 0.15s;
+}
+.icon-btn:hover { color: var(--terracotta); border-color: var(--terracotta); }
+.icon-btn.danger:hover { color: oklch(50% 0.15 37); border-color: oklch(50% 0.15 37); }
 
 /* ── Expanded editor ─────────────────── */
 .item-editor {
@@ -302,6 +333,21 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
   <div class="search-wrap">
     <input class="search-input" id="search-input" type="search"
       placeholder="Search menu items…" oninput="filterItems(this.value)">
+    <button class="btn btn-primary btn-full" id="addtoggle-btn" onclick="toggleAddItemPanel()">+ Add New Item</button>
+    <div class="add-item-panel" id="add-item-panel">
+      <label class="field-label" for="newitem-category">Category</label>
+      <select class="text-inp" id="newitem-category"></select>
+      <label class="field-label" for="newitem-name">Name</label>
+      <input class="text-inp" id="newitem-name" type="text" placeholder="e.g. Chicken Kabsa">
+      <label class="field-label" for="newitem-desc">Description</label>
+      <textarea class="text-inp" id="newitem-desc" rows="2" placeholder="Optional"></textarea>
+      <label class="field-label" for="newitem-price">Price</label>
+      <input class="text-inp" id="newitem-price" type="text" placeholder="e.g. $12.99">
+      <div class="add-actions">
+        <button class="btn btn-primary" id="createitem-btn" onclick="createItem()">Add Item</button>
+        <button class="btn" onclick="toggleAddItemPanel()">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <div class="items" id="items-list">
@@ -329,7 +375,9 @@ var FB_CONFIG = {
 var ADMIN_PIN = '2026';
 
 var fbDb, fbStorage;
-var allItems = []; // { slug, name, photos[] }
+var allItems = []; // { slug, name, photos[], desc, price, category, hidden, isAdded }
+var categoryList = []; // [{id, name}]
+var categoryOrder = {}; // { categoryId: [slug, ...] }
 var activeSlug = null; // currently expanded card
 var pendingFile = null, pendingUrl = null;
 var toastTimer;
@@ -379,11 +427,24 @@ async function loadItems() {
   var res = await fetch('menu.html?nc=' + Date.now());
   var text = await res.text();
   var doc = new DOMParser().parseFromString(text, 'text/html');
-  var photoEls = doc.querySelectorAll('.item-photo[data-item]');
 
-  // Load existing photos + text overrides from Firestore
+  // Build category list + default (DOM) order per category
+  categoryList = [];
+  categoryOrder = {};
+  doc.querySelectorAll('.menu-section[id]').forEach(function(section) {
+    var titleEl = section.querySelector('.section-title');
+    var catName = titleEl ? titleEl.textContent.trim() : section.id;
+    categoryList.push({ id: section.id, name: catName });
+    categoryOrder[section.id] = Array.prototype.map.call(
+      section.querySelectorAll('.item-photo[data-item]'),
+      function(el) { return el.getAttribute('data-item'); }
+    );
+  });
+
+  // Load existing photos, text overrides, and structure (hidden/added/order) from Firestore
   var existingPhotos = {};
   var existingText = {};
+  var structure = { hidden: {}, added: {}, order: {} };
   try {
     var snap = await fbDb.collection('menu').doc('photos').get();
     if (snap.exists) existingPhotos = snap.data();
@@ -392,29 +453,85 @@ async function loadItems() {
     var textSnap = await fbDb.collection('menu').doc('text').get();
     if (textSnap.exists) existingText = textSnap.data();
   } catch(e) { showToast('Could not load menu text from Firestore.', true); }
+  try {
+    var structSnap = await fbDb.collection('menu').doc('structure').get();
+    if (structSnap.exists) {
+      var sd = structSnap.data();
+      structure.hidden = sd.hidden || {};
+      structure.added  = sd.added  || {};
+      structure.order  = sd.order  || {};
+    }
+  } catch(e) { showToast('Could not load menu structure from Firestore.', true); }
 
-  allItems = [];
-  photoEls.forEach(function(el) {
-    var slug = el.getAttribute('data-item');
-    var item = el.closest('.item');
-    var nameEl = item ? item.querySelector('.item-name') : null;
-    var name = nameEl ? nameEl.textContent.trim() : slug;
+  // Apply saved order overrides, keeping any slugs missing from the saved
+  // order (e.g. a just-added item) appended at the end.
+  Object.keys(structure.order).forEach(function(catId) {
+    var saved = structure.order[catId] || [];
+    var defaultList = categoryOrder[catId] || [];
+    var extra = defaultList.filter(function(s) { return saved.indexOf(s) === -1; });
+    categoryOrder[catId] = saved.concat(extra);
+  });
+  // Make sure added items belonging to a category are present in its order list
+  Object.keys(structure.added).forEach(function(slug) {
+    var cat = structure.added[slug].category;
+    if (!cat) return;
+    if (!categoryOrder[cat]) categoryOrder[cat] = [];
+    if (categoryOrder[cat].indexOf(slug) === -1) categoryOrder[cat].push(slug);
+  });
+
+  function buildItem(slug, name, defaultDesc, defaultPrice, category, isAdded) {
     var val = existingPhotos[slug];
     var photos = Array.isArray(val) ? val : (val ? [val] : []);
+    var override = existingText[slug] || {};
+    var desc = typeof override.desc === 'string' ? override.desc : defaultDesc;
+    var price = typeof override.price === 'string' ? override.price : defaultPrice;
+    return {
+      slug: slug, name: name, photos: photos.slice(),
+      desc: desc, price: price, category: category,
+      hidden: !!structure.hidden[slug], isAdded: !!isAdded
+    };
+  }
 
+  allItems = [];
+  doc.querySelectorAll('.item-photo[data-item]').forEach(function(el) {
+    var slug = el.getAttribute('data-item');
+    var item = el.closest('.item');
+    var section = el.closest('.menu-section');
+    var nameEl = item ? item.querySelector('.item-name') : null;
+    var name = nameEl ? nameEl.textContent.trim() : slug;
     var descEl = item ? item.querySelector('.item-desc') : null;
     var priceEl = item ? item.querySelector('.item-price') : null;
     var defaultDesc = descEl ? descEl.textContent.trim() : '';
     var defaultPrice = priceEl ? priceEl.textContent.trim() : '';
-    var override = existingText[slug] || {};
-    var desc = typeof override.desc === 'string' ? override.desc : defaultDesc;
-    var price = typeof override.price === 'string' ? override.price : defaultPrice;
+    allItems.push(buildItem(slug, name, defaultDesc, defaultPrice, section ? section.id : '', false));
+  });
+  Object.keys(structure.added).forEach(function(slug) {
+    var info = structure.added[slug];
+    allItems.push(buildItem(slug, info.name || slug, info.desc || '', info.price || '', info.category || '', true));
+  });
 
-    allItems.push({ slug: slug, name: name, photos: photos.slice(), desc: desc, price: price });
+  // Sort by category (menu order), then by saved position within category
+  var catIndex = {};
+  categoryList.forEach(function(c, i) { catIndex[c.id] = i; });
+  allItems.sort(function(a, b) {
+    var ci = (catIndex[a.category] || 0) - (catIndex[b.category] || 0);
+    if (ci !== 0) return ci;
+    var listA = categoryOrder[a.category] || [];
+    var listB = categoryOrder[b.category] || [];
+    return listA.indexOf(a.slug) - listB.indexOf(b.slug);
   });
 
   renderItems(allItems);
+  populateCategoryDropdown();
   document.getElementById('loading-note') && document.getElementById('loading-note').remove();
+}
+
+function populateCategoryDropdown() {
+  var sel = document.getElementById('newitem-category');
+  if (!sel) return;
+  sel.innerHTML = categoryList.map(function(c) {
+    return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>';
+  }).join('');
 }
 
 // ── Render item cards ─────────────────────────────────────────────
@@ -437,6 +554,11 @@ function renderItems(items) {
   });
 }
 
+function categoryName(id) {
+  var c = categoryList.find(function(c) { return c.id === id; });
+  return c ? c.name : id;
+}
+
 function buildCard(item) {
   var firstPhoto = item.photos[0] || '';
   var thumb = firstPhoto
@@ -444,11 +566,24 @@ function buildCard(item) {
     : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(70% 0.02 37)" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
   var countBadge = item.photos.length > 1 ? '<span class="item-thumb-count">' + item.photos.length + '</span>' : '';
 
-  return '<div class="item-head">'
+  var metaBits = [item.photos.length + ' / 5 photos', esc(categoryName(item.category))];
+  if (item.hidden) metaBits.push('<span class="hidden-badge">Hidden</span>');
+  if (item.isAdded) metaBits.push('<span class="added-badge">New item</span>');
+
+  var removeBtn = item.hidden
+    ? '<button class="icon-btn" title="Restore to menu" onclick="restoreItem(\'' + item.slug + '\');event.stopPropagation()">↺</button>'
+    : '<button class="icon-btn danger" title="Remove from menu" onclick="hideItem(\'' + item.slug + '\');event.stopPropagation()">🗑</button>';
+
+  return '<div class="item-head' + (item.hidden ? ' is-hidden' : '') + '">'
     + '<div class="item-thumb" id="thumb-' + item.slug + '">' + thumb + countBadge + '</div>'
     + '<div class="item-info">'
     + '<div class="item-name">' + esc(item.name) + '</div>'
-    + '<div class="item-meta">' + item.photos.length + ' / 5 photos</div>'
+    + '<div class="item-meta">' + metaBits.join(' &middot; ') + '</div>'
+    + '</div>'
+    + '<div class="item-actions">'
+    + '<button class="icon-btn" title="Move up" onclick="moveItem(\'' + item.slug + '\',\'up\');event.stopPropagation()">↑</button>'
+    + '<button class="icon-btn" title="Move down" onclick="moveItem(\'' + item.slug + '\',\'down\');event.stopPropagation()">↓</button>'
+    + removeBtn
     + '</div>'
     + '<span class="item-chevron">›</span>'
     + '</div>'
@@ -761,6 +896,123 @@ function saveText(slug) {
         ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
         : e.message || 'Save failed.'), true);
       btn.disabled = false; btn.textContent = 'Save Description & Price';
+    });
+}
+
+// ── Add / remove / reorder items ───────────────────────────────────
+function toggleAddItemPanel() {
+  document.getElementById('add-item-panel').classList.toggle('visible');
+}
+
+function slugify(s) {
+  return String(s).toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'item';
+}
+function uniqueSlug(base) {
+  var slug = base, n = 2;
+  var existing = allItems.map(function(i) { return i.slug; });
+  while (existing.indexOf(slug) !== -1) { slug = base + '-' + n; n++; }
+  return slug;
+}
+
+function createItem() {
+  var category = document.getElementById('newitem-category').value;
+  var name = document.getElementById('newitem-name').value.trim();
+  var desc = document.getElementById('newitem-desc').value.trim();
+  var price = document.getElementById('newitem-price').value.trim();
+
+  if (!name) { showToast('Give the item a name first.', true); return; }
+  if (!category) { showToast('Pick a category first.', true); return; }
+
+  var slug = uniqueSlug(slugify(name));
+  var btn = document.getElementById('createitem-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+
+  var update = { added: {} };
+  update.added[slug] = { name: name, desc: desc, price: price, category: category };
+
+  fbDb.collection('menu').doc('structure').set(update, { merge: true })
+    .then(function() {
+      showToast('Item added!');
+      document.getElementById('newitem-name').value = '';
+      document.getElementById('newitem-desc').value = '';
+      document.getElementById('newitem-price').value = '';
+      toggleAddItemPanel();
+      btn.disabled = false; btn.textContent = 'Add Item';
+      loadItems();
+    })
+    .catch(function(e) {
+      dbg('Create item error: ' + (e.code || e.message), 'err');
+      showToast((e.code === 'permission-denied'
+        ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+        : e.message || 'Could not add item.'), true);
+      btn.disabled = false; btn.textContent = 'Add Item';
+    });
+}
+
+function hideItem(slug) {
+  var item = allItems.find(function(i) { return i.slug === slug; });
+  if (!item) return;
+  if (!confirm('Remove "' + item.name + '" from the menu? You can restore it later.')) return;
+
+  var update = { hidden: {} };
+  update.hidden[slug] = true;
+  fbDb.collection('menu').doc('structure').set(update, { merge: true })
+    .then(function() {
+      item.hidden = true;
+      refreshCard(item);
+      showToast('Item removed from menu.');
+    })
+    .catch(function(e) {
+      showToast((e.code === 'permission-denied'
+        ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+        : e.message || 'Could not remove item.'), true);
+    });
+}
+
+function restoreItem(slug) {
+  var item = allItems.find(function(i) { return i.slug === slug; });
+  if (!item) return;
+
+  var update = { hidden: {} };
+  update.hidden[slug] = firebase.firestore.FieldValue.delete();
+  fbDb.collection('menu').doc('structure').set(update, { merge: true })
+    .then(function() {
+      item.hidden = false;
+      refreshCard(item);
+      showToast('Item restored to menu.');
+    })
+    .catch(function(e) {
+      showToast((e.code === 'permission-denied'
+        ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+        : e.message || 'Could not restore item.'), true);
+    });
+}
+
+function moveItem(slug, direction) {
+  var item = allItems.find(function(i) { return i.slug === slug; });
+  if (!item) return;
+  var list = (categoryOrder[item.category] || []).slice();
+  var idx = list.indexOf(slug);
+  if (idx === -1) return;
+  var swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= list.length) return;
+
+  var tmp = list[idx]; list[idx] = list[swapIdx]; list[swapIdx] = tmp;
+  categoryOrder[item.category] = list;
+
+  var update = { order: {} };
+  update.order[item.category] = list;
+  fbDb.collection('menu').doc('structure').set(update, { merge: true })
+    .then(function() {
+      showToast('Order updated!');
+      loadItems();
+    })
+    .catch(function(e) {
+      showToast((e.code === 'permission-denied'
+        ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+        : e.message || 'Could not save order.'), true);
     });
 }
 
