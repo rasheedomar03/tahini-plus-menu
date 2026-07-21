@@ -1532,6 +1532,39 @@ var FB_CONFIG = {
         });
       });
     }).catch(function(){});
+
+    // Description & price overrides (edited via admin.html)
+    firebase.firestore().collection('menu').doc('text').get().then(function(doc) {
+      if (!doc.exists) return;
+      var data = doc.data();
+      Object.keys(data).forEach(function(slug) {
+        var override = data[slug] || {};
+        var photoEl = document.querySelector('.item-photo[data-item="'+slug+'"]');
+        var item = photoEl ? photoEl.closest('.item') : null;
+        if (!item) return;
+
+        if (typeof override.desc === 'string') {
+          var descEl = item.querySelector('.item-desc');
+          if (override.desc) {
+            if (!descEl) {
+              descEl = document.createElement('p');
+              descEl.className = 'item-desc';
+              var mainEl = item.querySelector('.item-main');
+              var nameEl = mainEl ? mainEl.querySelector('.item-name') : null;
+              if (mainEl && nameEl) nameEl.insertAdjacentElement('afterend', descEl);
+            }
+            if (descEl) descEl.textContent = override.desc;
+          } else if (descEl) {
+            descEl.remove();
+          }
+        }
+
+        if (typeof override.price === 'string' && override.price) {
+          var priceEl = item.querySelector('.item-price');
+          if (priceEl) priceEl.textContent = override.price;
+        }
+      });
+    }).catch(function(){});
   } catch(e) {}
 })();
 

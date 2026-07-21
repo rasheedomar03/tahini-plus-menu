@@ -212,6 +212,23 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
 .url-inp:focus { border-color: var(--terracotta); }
 .add-actions { display: flex; gap: 0.5rem; }
 
+/* ── Description & price editor ────────── */
+.text-edit {
+  display: flex; flex-direction: column; gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+.field-label { font-size: 0.72rem; font-weight: 600; color: var(--ink-muted); margin-top: 0.4rem; }
+.field-label:first-child { margin-top: 0; }
+.text-inp {
+  width: 100%; padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: var(--font-b); font-size: 0.85rem;
+  background: var(--surface); color: var(--ink); outline: none;
+  resize: vertical;
+}
+.text-inp:focus { border-color: var(--terracotta); }
+.text-edit .btn { margin-top: 0.5rem; }
+
 /* ── Upload progress ─────────────────── */
 .progress-bar {
   height: 3px; border-radius: 2px;
@@ -364,12 +381,17 @@ async function loadItems() {
   var doc = new DOMParser().parseFromString(text, 'text/html');
   var photoEls = doc.querySelectorAll('.item-photo[data-item]');
 
-  // Load existing photos from Firestore
-  var existing = {};
+  // Load existing photos + text overrides from Firestore
+  var existingPhotos = {};
+  var existingText = {};
   try {
     var snap = await fbDb.collection('menu').doc('photos').get();
-    if (snap.exists) existing = snap.data();
+    if (snap.exists) existingPhotos = snap.data();
   } catch(e) { showToast('Could not load photos from Firestore.', true); }
+  try {
+    var textSnap = await fbDb.collection('menu').doc('text').get();
+    if (textSnap.exists) existingText = textSnap.data();
+  } catch(e) { showToast('Could not load menu text from Firestore.', true); }
 
   allItems = [];
   photoEls.forEach(function(el) {
@@ -377,9 +399,18 @@ async function loadItems() {
     var item = el.closest('.item');
     var nameEl = item ? item.querySelector('.item-name') : null;
     var name = nameEl ? nameEl.textContent.trim() : slug;
-    var val = existing[slug];
+    var val = existingPhotos[slug];
     var photos = Array.isArray(val) ? val : (val ? [val] : []);
-    allItems.push({ slug: slug, name: name, photos: photos.slice() });
+
+    var descEl = item ? item.querySelector('.item-desc') : null;
+    var priceEl = item ? item.querySelector('.item-price') : null;
+    var defaultDesc = descEl ? descEl.textContent.trim() : '';
+    var defaultPrice = priceEl ? priceEl.textContent.trim() : '';
+    var override = existingText[slug] || {};
+    var desc = typeof override.desc === 'string' ? override.desc : defaultDesc;
+    var price = typeof override.price === 'string' ? override.price : defaultPrice;
+
+    allItems.push({ slug: slug, name: name, photos: photos.slice(), desc: desc, price: price });
   });
 
   renderItems(allItems);
@@ -440,7 +471,16 @@ function buildEditor(item) {
       + '<span>Add</span></div>';
   }
 
-  return '<div class="photos-grid" id="grid-' + item.slug + '">' + slots + '</div>'
+  var textEdit = '<div class="text-edit">'
+    + '<label class="field-label" for="descinp-' + item.slug + '">Description</label>'
+    + '<textarea class="text-inp" id="descinp-' + item.slug + '" rows="2" placeholder="No description">' + esc(item.desc) + '</textarea>'
+    + '<label class="field-label" for="priceinp-' + item.slug + '">Price</label>'
+    + '<input class="text-inp" id="priceinp-' + item.slug + '" type="text" placeholder="e.g. $9.99" value="' + esc(item.price) + '">'
+    + '<button class="btn btn-primary btn-full" onclick="saveText(\'' + item.slug + '\')" id="savetextbtn-' + item.slug + '">Save Description &amp; Price</button>'
+    + '</div>';
+
+  return textEdit
+    + '<div class="photos-grid" id="grid-' + item.slug + '">' + slots + '</div>'
     + '<div class="photos-hint" id="hint-' + item.slug + '">' + item.photos.length + ' / 5 photos</div>'
     + '<div class="add-panel" id="addpanel-' + item.slug + '">'
     + '<div class="add-preview" id="preview-' + item.slug + '">No photo selected yet</div>'
@@ -683,6 +723,44 @@ function saveToFirestore(slug, photos, cb) {
       showToast((e.code === 'permission-denied'
         ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
         : e.message || 'Firestore save failed.'), true);
+    });
+}
+
+// ── Save description & price ───────────────────────────────────────
+function saveText(slug) {
+  var item = allItems.find(function(i) { return i.slug === slug; });
+  if (!item) return;
+
+  var descVal = document.getElementById('descinp-' + slug).value;
+  var priceVal = document.getElementById('priceinp-' + slug).value;
+  var btn = document.getElementById('savetextbtn-' + slug);
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  var update = {};
+  update[slug] = { desc: descVal, price: priceVal };
+
+  var timer = setTimeout(function() {
+    dbg('Text save timed out after 20 s', 'err');
+    showToast('Save timed out. Check Firestore rules in Firebase Console.', true);
+    btn.disabled = false; btn.textContent = 'Save Description & Price';
+  }, 20000);
+
+  fbDb.collection('menu').doc('text').set(update, { merge: true })
+    .then(function() {
+      clearTimeout(timer);
+      item.desc = descVal;
+      item.price = priceVal;
+      dbg('Text save OK', 'ok');
+      showToast('Description & price saved!');
+      btn.disabled = false; btn.textContent = 'Save Description & Price';
+    })
+    .catch(function(e) {
+      clearTimeout(timer);
+      dbg('Text save error: ' + (e.code || e.message), 'err');
+      showToast((e.code === 'permission-denied'
+        ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+        : e.message || 'Save failed.'), true);
+      btn.disabled = false; btn.textContent = 'Save Description & Price';
     });
 }
 
