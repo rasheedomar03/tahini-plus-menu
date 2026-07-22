@@ -1598,6 +1598,45 @@ var FB_CONFIG = {
       });
     });
 
+    // 3a) Apply saved category order (reorders both the sections and the nav bar)
+    var categoryOrder = structureData.categoryOrder;
+    if (Array.isArray(categoryOrder) && categoryOrder.length) {
+      var menuMain = document.querySelector('main.menu-content');
+      var navInner = document.querySelector('.cat-nav-inner');
+      categoryOrder.forEach(function(catId) {
+        var section = document.getElementById(catId);
+        if (menuMain && section) menuMain.appendChild(section);
+        var btn = navInner ? navInner.querySelector('.cat-btn[href="#'+catId+'"]') : null;
+        if (navInner && btn) navInner.appendChild(btn);
+      });
+    }
+
+    // 3b) Hide categories/sub-labels that have ended up with zero items,
+    // and show them again automatically once an item exists.
+    document.querySelectorAll('.menu-section').forEach(function(section) {
+      // Sub-labels: hide any with no items before the next sub-label / end of section
+      var children = Array.prototype.slice.call(section.children);
+      var currentLabel = null, count = 0;
+      function finalizeLabel() {
+        if (currentLabel) currentLabel.style.display = count > 0 ? '' : 'none';
+      }
+      children.forEach(function(child) {
+        if (child.classList.contains('sub-label')) {
+          finalizeLabel();
+          currentLabel = child; count = 0;
+        } else if (child.classList.contains('item')) {
+          count++;
+        }
+      });
+      finalizeLabel();
+
+      // Whole category: hide section + its nav button if it has no items left
+      var hasItems = section.querySelectorAll('.item').length > 0;
+      section.style.display = hasItems ? '' : 'none';
+      var navBtn = document.querySelector('.cat-btn[href="#'+section.id+'"]');
+      if (navBtn) navBtn.style.display = hasItems ? '' : 'none';
+    });
+
     // 4) Photo overlay
     Object.keys(photosData).forEach(function(slug) {
       var val = photosData[slug];

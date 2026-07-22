@@ -117,6 +117,22 @@ body { font-family: var(--font-b); background: var(--canvas); color: var(--ink);
 .add-item-panel.visible { display: flex; }
 select.text-inp { appearance: auto; }
 
+/* ── Category order panel ─────────────── */
+.cat-order-panel {
+  background: oklch(97.5% 0.006 82);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.875rem; display: none;
+  flex-direction: column; gap: 0.4rem;
+}
+.cat-order-panel.visible { display: flex; }
+.cat-order-row {
+  display: flex; align-items: center; gap: 0.6rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.55rem 0.75rem;
+}
+.cat-order-row .cat-order-name { flex: 1; font-size: 0.85rem; font-weight: 500; }
+.cat-order-row .item-actions { flex-shrink: 0; }
+
 /* ── Items list ──────────────────────── */
 .items { max-width: 700px; margin: 0 auto; padding: 0 1.25rem 4rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .category-header {
@@ -354,6 +370,8 @@ select.text-inp { appearance: auto; }
         <button class="btn" onclick="toggleAddItemPanel()">Cancel</button>
       </div>
     </div>
+    <button class="btn btn-full" id="catordertoggle-btn" onclick="toggleCategoryOrderPanel()">Manage Category Order</button>
+    <div class="cat-order-panel" id="cat-order-panel"></div>
   </div>
 
   <div class="items" id="items-list">
@@ -450,7 +468,7 @@ async function loadItems() {
   // Load existing photos, text overrides, and structure (hidden/added/order) from Firestore
   var existingPhotos = {};
   var existingText = {};
-  var structure = { hidden: {}, added: {}, order: {} };
+  var structure = { hidden: {}, added: {}, order: {}, categoryOrder: [] };
   try {
     var snap = await fbDb.collection('menu').doc('photos').get();
     if (snap.exists) existingPhotos = snap.data();
@@ -466,8 +484,18 @@ async function loadItems() {
       structure.hidden = sd.hidden || {};
       structure.added  = sd.added  || {};
       structure.order  = sd.order  || {};
+      structure.categoryOrder = sd.categoryOrder || [];
     }
   } catch(e) { showToast('Could not load menu structure from Firestore.', true); }
+
+  // Apply saved category order, appending any categories missing from it
+  if (structure.categoryOrder.length) {
+    var catById = {};
+    categoryList.forEach(function(c) { catById[c.id] = c; });
+    var ordered = structure.categoryOrder.map(function(id) { return catById[id]; }).filter(Boolean);
+    var extraCats = categoryList.filter(function(c) { return structure.categoryOrder.indexOf(c.id) === -1; });
+    categoryList = ordered.concat(extraCats);
+  }
 
   // Apply saved order overrides, keeping any slugs missing from the saved
   // order (e.g. a just-added item) appended at the end.
@@ -529,6 +557,7 @@ async function loadItems() {
 
   renderItems(allItems);
   populateCategoryDropdown();
+  renderCategoryOrderPanel();
   document.getElementById('loading-note') && document.getElementById('loading-note').remove();
 }
 
@@ -538,6 +567,46 @@ function populateCategoryDropdown() {
   sel.innerHTML = categoryList.map(function(c) {
     return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>';
   }).join('');
+}
+
+// ── Category order panel ───────────────────────────────────────────
+function toggleCategoryOrderPanel() {
+  document.getElementById('cat-order-panel').classList.toggle('visible');
+}
+
+function renderCategoryOrderPanel() {
+  var panel = document.getElementById('cat-order-panel');
+  if (!panel) return;
+  panel.innerHTML = categoryList.map(function(c, i) {
+    return '<div class="cat-order-row">'
+      + '<span class="cat-order-name">' + esc(c.name) + '</span>'
+      + '<div class="item-actions">'
+      + '<button class="icon-btn" title="Move up" onclick="moveCategory(\'' + c.id + '\',\'up\')">↑</button>'
+      + '<button class="icon-btn" title="Move down" onclick="moveCategory(\'' + c.id + '\',\'down\')">↓</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function moveCategory(id, direction) {
+  var list = categoryList.map(function(c) { return c.id; });
+  var idx = list.indexOf(id);
+  if (idx === -1) return;
+  var swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= list.length) return;
+
+  var tmp = list[idx]; list[idx] = list[swapIdx]; list[swapIdx] = tmp;
+
+  fbDb.collection('menu').doc('structure').set({ categoryOrder: list }, { merge: true })
+    .then(function() {
+      showToast('Category order updated!');
+      loadItems();
+    })
+    .catch(function(e) {
+      showToast((e.code === 'permission-denied'
+        ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+        : e.message || 'Could not save category order.'), true);
+    });
 }
 
 // ── Render item cards ─────────────────────────────────────────────
