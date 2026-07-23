@@ -1666,12 +1666,13 @@ var FB_CONFIG = {
       });
     });
 
-    // 5) Description & price overrides (edited via admin.html)
+    // 5) Description, price & add-on note overrides (edited via admin.html)
     Object.keys(textData).forEach(function(slug) {
       var override = textData[slug] || {};
       var photoEl = document.querySelector('.item-photo[data-item="'+slug+'"]');
       var item = photoEl ? photoEl.closest('.item') : null;
       if (!item) return;
+      var mainEl = item.querySelector('.item-main');
 
       if (typeof override.desc === 'string') {
         var descEl = item.querySelector('.item-desc');
@@ -1679,13 +1680,26 @@ var FB_CONFIG = {
           if (!descEl) {
             descEl = document.createElement('p');
             descEl.className = 'item-desc';
-            var mainEl = item.querySelector('.item-main');
             var nameEl = mainEl ? mainEl.querySelector('.item-name') : null;
             if (mainEl && nameEl) nameEl.insertAdjacentElement('afterend', descEl);
           }
           if (descEl) descEl.textContent = override.desc;
         } else if (descEl) {
           descEl.remove();
+        }
+      }
+
+      if (typeof override.addons === 'string') {
+        var addonsEl = item.querySelector('.item-addons');
+        if (override.addons) {
+          if (!addonsEl) {
+            addonsEl = document.createElement('p');
+            addonsEl.className = 'item-addons';
+            if (mainEl) mainEl.appendChild(addonsEl);
+          }
+          if (addonsEl) addonsEl.textContent = override.addons;
+        } else if (addonsEl) {
+          addonsEl.remove();
         }
       }
 

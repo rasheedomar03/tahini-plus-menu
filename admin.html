@@ -530,15 +530,16 @@ async function loadItems() {
     if (categoryOrder[newCat].indexOf(slug) === -1) categoryOrder[newCat].push(slug);
   });
 
-  function buildItem(slug, name, defaultDesc, defaultPrice, category, isAdded) {
+  function buildItem(slug, name, defaultDesc, defaultPrice, defaultAddons, category, isAdded) {
     var val = existingPhotos[slug];
     var photos = Array.isArray(val) ? val : (val ? [val] : []);
     var override = existingText[slug] || {};
     var desc = typeof override.desc === 'string' ? override.desc : defaultDesc;
     var price = typeof override.price === 'string' ? override.price : defaultPrice;
+    var addons = typeof override.addons === 'string' ? override.addons : (defaultAddons || '');
     return {
       slug: slug, name: name, photos: photos.slice(),
-      desc: desc, price: price, category: category,
+      desc: desc, price: price, addons: addons, category: category,
       hidden: !!structure.hidden[slug], isAdded: !!isAdded
     };
   }
@@ -552,15 +553,17 @@ async function loadItems() {
     var name = nameEl ? nameEl.textContent.trim() : slug;
     var descEl = item ? item.querySelector('.item-desc') : null;
     var priceEl = item ? item.querySelector('.item-price') : null;
+    var addonsEl = item ? item.querySelector('.item-addons') : null;
     var defaultDesc = descEl ? descEl.textContent.trim() : '';
     var defaultPrice = priceEl ? priceEl.textContent.trim() : '';
+    var defaultAddons = addonsEl ? addonsEl.textContent.trim() : '';
     var cat = effectiveCategory(slug, section ? section.id : '');
-    allItems.push(buildItem(slug, name, defaultDesc, defaultPrice, cat, false));
+    allItems.push(buildItem(slug, name, defaultDesc, defaultPrice, defaultAddons, cat, false));
   });
   Object.keys(structure.added).forEach(function(slug) {
     var info = structure.added[slug];
     var cat = effectiveCategory(slug, info.category || '');
-    allItems.push(buildItem(slug, info.name || slug, info.desc || '', info.price || '', cat, true));
+    allItems.push(buildItem(slug, info.name || slug, info.desc || '', info.price || '', info.addons || '', cat, true));
   });
 
   // Sort by category (menu order), then by saved position within category
@@ -717,7 +720,9 @@ function buildEditor(item) {
     + '<textarea class="text-inp" id="descinp-' + item.slug + '" rows="2" placeholder="No description">' + esc(item.desc) + '</textarea>'
     + '<label class="field-label" for="priceinp-' + item.slug + '">Price</label>'
     + '<input class="text-inp" id="priceinp-' + item.slug + '" type="text" placeholder="e.g. $9.99" value="' + esc(item.price) + '">'
-    + '<button class="btn btn-primary btn-full" onclick="saveText(\'' + item.slug + '\')" id="savetextbtn-' + item.slug + '">Save Description &amp; Price</button>'
+    + '<label class="field-label" for="addonsinp-' + item.slug + '">Add-on Note</label>'
+    + '<input class="text-inp" id="addonsinp-' + item.slug + '" type="text" placeholder="e.g. +Hummus $1 | +Fries $3.99" value="' + esc(item.addons) + '">'
+    + '<button class="btn btn-primary btn-full" onclick="saveText(\'' + item.slug + '\')" id="savetextbtn-' + item.slug + '">Save Description, Price &amp; Add-on</button>'
     + '<label class="field-label" for="movecat-' + item.slug + '">Category</label>'
     + '<select class="text-inp" id="movecat-' + item.slug + '">' + categoryOptions + '</select>'
     + '<button class="btn btn-full" onclick="moveItemCategory(\'' + item.slug + '\')" id="movecatbtn-' + item.slug + '">Move to This Category</button>'
@@ -977,16 +982,18 @@ function saveText(slug) {
 
   var descVal = document.getElementById('descinp-' + slug).value;
   var priceVal = document.getElementById('priceinp-' + slug).value;
+  var addonsVal = document.getElementById('addonsinp-' + slug).value;
   var btn = document.getElementById('savetextbtn-' + slug);
+  var resetLabel = 'Save Description, Price & Add-on';
   btn.disabled = true; btn.textContent = 'Saving…';
 
   var update = {};
-  update[slug] = { desc: descVal, price: priceVal };
+  update[slug] = { desc: descVal, price: priceVal, addons: addonsVal };
 
   var timer = setTimeout(function() {
     dbg('Text save timed out after 20 s', 'err');
     showToast('Save timed out. Check Firestore rules in Firebase Console.', true);
-    btn.disabled = false; btn.textContent = 'Save Description & Price';
+    btn.disabled = false; btn.textContent = resetLabel;
   }, 20000);
 
   fbDb.collection('menu').doc('text').set(update, { merge: true })
@@ -994,9 +1001,10 @@ function saveText(slug) {
       clearTimeout(timer);
       item.desc = descVal;
       item.price = priceVal;
+      item.addons = addonsVal;
       dbg('Text save OK', 'ok');
-      showToast('Description & price saved!');
-      btn.disabled = false; btn.textContent = 'Save Description & Price';
+      showToast('Description, price & add-on saved!');
+      btn.disabled = false; btn.textContent = resetLabel;
     })
     .catch(function(e) {
       clearTimeout(timer);
@@ -1004,7 +1012,7 @@ function saveText(slug) {
       showToast((e.code === 'permission-denied'
         ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
         : e.message || 'Save failed.'), true);
-      btn.disabled = false; btn.textContent = 'Save Description & Price';
+      btn.disabled = false; btn.textContent = resetLabel;
     });
 }
 
