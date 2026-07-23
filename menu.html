@@ -338,8 +338,9 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 /* ─── Menu Items ─────────────────────────── */
 .item {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
-  gap: var(--space-4);
+  gap: var(--space-2) var(--space-4);
   padding: var(--space-6) var(--space-6);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -354,7 +355,7 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   box-shadow: 0 4px 16px oklch(60% 0.01 75 / 0.09);
 }
 
-.item-main { flex: 1; min-width: 0; }
+.item-main { flex: 1 1 160px; min-width: 160px; }
 
 .item-name {
   font-family: var(--font-display);
@@ -385,8 +386,8 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   font-size: var(--text-base);
   font-weight: 700;
   color: var(--terracotta);
-  flex-shrink: 0;
-  max-width: 40%;
+  flex: 0 1 auto;
+  margin-left: auto;
   padding-top: 0.2rem;
   text-align: right;
   letter-spacing: 0.01em;
