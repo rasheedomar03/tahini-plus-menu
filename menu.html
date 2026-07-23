@@ -511,19 +511,22 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 
 .build-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: var(--space-1);
 }
 
 .build-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 0.35rem 0.75rem;
   padding: var(--space-2) var(--space-1);
   border-bottom: 1px solid var(--border);
   font-size: var(--text-sm);
   color: var(--ink-muted);
 }
+.build-name { word-break: break-word; }
 
 .build-row:nth-last-child(-n+2) { border-bottom: none; }
 .build-name { font-weight: 500; color: var(--ink); }
@@ -629,6 +632,7 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   .section-title { font-size: var(--text-3xl); }
   .item-photo { width: 152px; height: 152px; }
   .item-photo:not(:has(> img))::after { width: 48px; height: 48px; }
+  .build-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 360px) {
@@ -636,7 +640,6 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   .item-price { min-width: 3.5rem; font-size: var(--text-base); }
   .item-photo { width: 92px; height: 92px; }
   .item-photo:not(:has(> img))::after { width: 32px; height: 32px; }
-  .build-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
