@@ -468,7 +468,7 @@ async function loadItems() {
   // Load existing photos, text overrides, and structure (hidden/added/order) from Firestore
   var existingPhotos = {};
   var existingText = {};
-  var structure = { hidden: {}, added: {}, order: {}, categoryOrder: [] };
+  var structure = { hidden: {}, added: {}, order: {}, categoryOrder: [], categoryOverride: {} };
   try {
     var snap = await fbDb.collection('menu').doc('photos').get();
     if (snap.exists) existingPhotos = snap.data();
@@ -485,8 +485,13 @@ async function loadItems() {
       structure.added  = sd.added  || {};
       structure.order  = sd.order  || {};
       structure.categoryOrder = sd.categoryOrder || [];
+      structure.categoryOverride = sd.categoryOverride || {};
     }
   } catch(e) { showToast('Could not load menu structure from Firestore.', true); }
+
+  function effectiveCategory(slug, fallbackCategory) {
+    return structure.categoryOverride[slug] || fallbackCategory;
+  }
 
   // Apply saved category order, appending any categories missing from it
   if (structure.categoryOrder.length) {
@@ -507,10 +512,22 @@ async function loadItems() {
   });
   // Make sure added items belonging to a category are present in its order list
   Object.keys(structure.added).forEach(function(slug) {
-    var cat = structure.added[slug].category;
+    var cat = effectiveCategory(slug, structure.added[slug].category);
     if (!cat) return;
     if (!categoryOrder[cat]) categoryOrder[cat] = [];
     if (categoryOrder[cat].indexOf(slug) === -1) categoryOrder[cat].push(slug);
+  });
+  // Relocate any item (static or added) whose category was explicitly
+  // changed via admin — remove it from its old list, append to the new one
+  Object.keys(structure.categoryOverride).forEach(function(slug) {
+    var newCat = structure.categoryOverride[slug];
+    Object.keys(categoryOrder).forEach(function(catId) {
+      if (catId === newCat) return;
+      var idx = categoryOrder[catId].indexOf(slug);
+      if (idx !== -1) categoryOrder[catId].splice(idx, 1);
+    });
+    if (!categoryOrder[newCat]) categoryOrder[newCat] = [];
+    if (categoryOrder[newCat].indexOf(slug) === -1) categoryOrder[newCat].push(slug);
   });
 
   function buildItem(slug, name, defaultDesc, defaultPrice, category, isAdded) {
@@ -537,11 +554,13 @@ async function loadItems() {
     var priceEl = item ? item.querySelector('.item-price') : null;
     var defaultDesc = descEl ? descEl.textContent.trim() : '';
     var defaultPrice = priceEl ? priceEl.textContent.trim() : '';
-    allItems.push(buildItem(slug, name, defaultDesc, defaultPrice, section ? section.id : '', false));
+    var cat = effectiveCategory(slug, section ? section.id : '');
+    allItems.push(buildItem(slug, name, defaultDesc, defaultPrice, cat, false));
   });
   Object.keys(structure.added).forEach(function(slug) {
     var info = structure.added[slug];
-    allItems.push(buildItem(slug, info.name || slug, info.desc || '', info.price || '', info.category || '', true));
+    var cat = effectiveCategory(slug, info.category || '');
+    allItems.push(buildItem(slug, info.name || slug, info.desc || '', info.price || '', cat, true));
   });
 
   // Sort by category (menu order), then by saved position within category
@@ -689,12 +708,19 @@ function buildEditor(item) {
       + '<span>Add</span></div>';
   }
 
+  var categoryOptions = categoryList.map(function(c) {
+    return '<option value="' + esc(c.id) + '"' + (c.id === item.category ? ' selected' : '') + '>' + esc(c.name) + '</option>';
+  }).join('');
+
   var textEdit = '<div class="text-edit">'
     + '<label class="field-label" for="descinp-' + item.slug + '">Description</label>'
     + '<textarea class="text-inp" id="descinp-' + item.slug + '" rows="2" placeholder="No description">' + esc(item.desc) + '</textarea>'
     + '<label class="field-label" for="priceinp-' + item.slug + '">Price</label>'
     + '<input class="text-inp" id="priceinp-' + item.slug + '" type="text" placeholder="e.g. $9.99" value="' + esc(item.price) + '">'
     + '<button class="btn btn-primary btn-full" onclick="saveText(\'' + item.slug + '\')" id="savetextbtn-' + item.slug + '">Save Description &amp; Price</button>'
+    + '<label class="field-label" for="movecat-' + item.slug + '">Category</label>'
+    + '<select class="text-inp" id="movecat-' + item.slug + '">' + categoryOptions + '</select>'
+    + '<button class="btn btn-full" onclick="moveItemCategory(\'' + item.slug + '\')" id="movecatbtn-' + item.slug + '">Move to This Category</button>'
     + '</div>';
 
   return textEdit
@@ -1097,6 +1123,45 @@ function moveItem(slug, direction) {
         ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
         : e.message || 'Could not save order.'), true);
     });
+}
+
+function moveItemCategory(slug) {
+  var item = allItems.find(function(i) { return i.slug === slug; });
+  if (!item) return;
+  var sel = document.getElementById('movecat-' + slug);
+  var newCat = sel.value;
+  if (newCat === item.category) { showToast('Already in that category.'); return; }
+
+  var btn = document.getElementById('movecatbtn-' + slug);
+  btn.disabled = true; btn.textContent = 'Moving…';
+
+  fbDb.collection('menu').doc('structure').get().then(function(doc) {
+    var data = doc.exists ? doc.data() : {};
+    var override = data.categoryOverride || {};
+    override[slug] = newCat;
+
+    // Strip this slug out of every category's saved order — it'll land
+    // at the bottom of its new category, ready to be repositioned.
+    var order = data.order || {};
+    var cleanedOrder = {};
+    Object.keys(order).forEach(function(catId) {
+      cleanedOrder[catId] = (order[catId] || []).filter(function(s) { return s !== slug; });
+    });
+
+    return fbDb.collection('menu').doc('structure').set(
+      { categoryOverride: override, order: cleanedOrder },
+      { merge: true }
+    );
+  }).then(function() {
+    showToast('Moved to ' + categoryName(newCat) + '!');
+    loadItems();
+  }).catch(function(e) {
+    dbg('Move category error: ' + (e.code || e.message), 'err');
+    showToast((e.code === 'permission-denied'
+      ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+      : e.message || 'Could not move item.'), true);
+    btn.disabled = false; btn.textContent = 'Move to This Category';
+  });
 }
 
 // ── Refresh one card in place ─────────────────────────────────────

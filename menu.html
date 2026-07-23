@@ -1546,6 +1546,7 @@ var FB_CONFIG = {
     var hidden = structureData.hidden || {};
     var added  = structureData.added  || {};
     var order  = structureData.order  || {};
+    var categoryOverride = structureData.categoryOverride || {};
 
     // 1) Hide removed items
     Object.keys(hidden).forEach(function(slug) {
@@ -1591,6 +1592,15 @@ var FB_CONFIG = {
       div.appendChild(priceDiv);
 
       section.appendChild(div);
+    });
+
+    // 2b) Relocate items whose category was explicitly changed via admin
+    Object.keys(categoryOverride).forEach(function(slug) {
+      if (hidden[slug]) return;
+      var targetSection = document.getElementById(categoryOverride[slug]);
+      var el = document.querySelector('.item-photo[data-item="'+slug+'"]');
+      var itemEl = el ? el.closest('.item') : null;
+      if (targetSection && itemEl) targetSection.appendChild(itemEl);
     });
 
     // 3) Apply saved item order within each category
