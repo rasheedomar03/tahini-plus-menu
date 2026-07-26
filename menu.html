@@ -554,10 +554,7 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 .footer-name em { color: var(--terracotta); font-style: italic; }
 .footer-tagline { font-family: var(--font-display); font-style: italic; font-size: var(--text-sm); color: oklch(58% 0.01 75); margin-bottom: var(--space-5); }
 .footer-info { font-size: var(--text-sm); line-height: 1.9; }
-.footer-links { display: flex; justify-content: center; gap: var(--space-4); margin: var(--space-5) 0; flex-wrap: wrap; }
-.footer-links a { font-size: var(--text-sm); color: oklch(80% 0.01 82); text-decoration: none; }
-.footer-links a:hover { color: var(--terracotta); }
-.footer-social { display: flex; justify-content: center; gap: var(--space-4); margin: var(--space-2) 0 var(--space-4); }
+.footer-social { display: flex; justify-content: center; gap: var(--space-4); margin: var(--space-5) 0 var(--space-4); }
 .footer-social a {
   display: inline-flex; align-items: center; justify-content: center;
   width: 34px; height: 34px; border-radius: 50%;
@@ -721,51 +718,9 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   transition: color 0.15s, border-color 0.15s;
 }
 .admin-link:hover { color: var(--terracotta); border-color: var(--terracotta); }
-
-/* ─── Site nav (shared across pages) ─────── */
-.site-nav {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-6);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  flex-wrap: nowrap;
-}
-.site-nav-logo {
-  font-family: var(--font-display); font-size: 1.1rem; font-weight: 400;
-  color: var(--ink); text-decoration: none; letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-.site-nav-logo em { font-style: italic; color: var(--terracotta); }
-.site-nav-links { display: flex; gap: var(--space-5); }
-.site-nav-link {
-  font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
-  color: var(--ink-muted); text-decoration: none;
-  padding: 0.3rem 0; border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
-  white-space: nowrap;
-}
-.site-nav-link:hover { color: var(--ink); }
-.site-nav-link.active { color: var(--terracotta); border-color: var(--terracotta); }
-@media (max-width: 480px) {
-  .site-nav { padding: var(--space-3) var(--space-4); }
-  .site-nav-links { gap: var(--space-3); }
-  .site-nav-link { font-size: 0.78rem; }
-}
 </style>
 </head>
 <body>
-
-<!-- ── SITE NAV ─────────────────────────── -->
-<nav class="site-nav">
-  <a href="index.html" class="site-nav-logo">Tahini <em>Plus</em></a>
-  <div class="site-nav-links">
-    <a href="index.html" class="site-nav-link">Home</a>
-    <a href="menu.html" class="site-nav-link active">Menu</a>
-    <a href="about.html" class="site-nav-link">About</a>
-    <a href="contact.html" class="site-nav-link">Contact</a>
-  </div>
-</nav>
 
 <!-- ── HEADER ───────────────────────────── -->
 <header class="site-header">
@@ -1478,12 +1433,6 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
     6802 S Texas 6, Houston, TX 77083<br>
     Halal Certified &nbsp;&middot;&nbsp; Dine-In &nbsp;&middot;&nbsp; Takeout &nbsp;&middot;&nbsp; Catering
   </p>
-  <div class="footer-links">
-    <a href="index.html">Home</a>
-    <a href="menu.html">Menu</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-  </div>
   <div class="footer-social">
     <a href="https://www.facebook.com/TahiniKitchen" target="_blank" rel="noopener" aria-label="Facebook">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94z"/></svg>

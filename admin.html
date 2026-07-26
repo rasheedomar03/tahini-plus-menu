@@ -721,7 +721,7 @@ function buildEditor(item) {
     + '<label class="field-label" for="priceinp-' + item.slug + '">Price</label>'
     + '<input class="text-inp" id="priceinp-' + item.slug + '" type="text" placeholder="e.g. $9.99" value="' + esc(item.price) + '">'
     + '<label class="field-label" for="addonsinp-' + item.slug + '">Add-on Note</label>'
-    + '<input class="text-inp" id="addonsinp-' + item.slug + '" type="text" placeholder="e.g. +Hummus $1 | +Fries $3.99" value="' + esc(item.addons) + '">'
+    + '<input class="text-inp" id="addonsinp-' + item.slug + '" type="text" placeholder="Example: +Hummus $1 | +Fries $3.99" value="' + esc(item.addons) + '">'
     + '<button class="btn btn-primary btn-full" onclick="saveText(\'' + item.slug + '\')" id="savetextbtn-' + item.slug + '">Save Description, Price &amp; Add-on</button>'
     + '<label class="field-label" for="movecat-' + item.slug + '">Category</label>'
     + '<select class="text-inp" id="movecat-' + item.slug + '">' + categoryOptions + '</select>'
