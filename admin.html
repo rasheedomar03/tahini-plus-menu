@@ -307,6 +307,12 @@ select.text-inp { appearance: auto; }
 }
 .text-inp:focus { border-color: var(--terracotta); }
 .text-edit .btn { margin-top: 0.5rem; }
+.sig-toggle-label {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.82rem; color: var(--ink); cursor: pointer;
+  margin-top: 0.4rem;
+}
+.sig-toggle-label input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; }
 
 /* ── Upload progress ─────────────────── */
 .progress-bar {
@@ -591,16 +597,18 @@ async function loadItems() {
     if (categoryOrder[newCat].indexOf(slug) === -1) categoryOrder[newCat].push(slug);
   });
 
-  function buildItem(slug, name, defaultDesc, defaultPrice, defaultAddons, category, isAdded) {
+  function buildItem(slug, name, defaultDesc, defaultPrice, defaultAddons, defaultSignature, defaultBadge, category, isAdded) {
     var val = existingPhotos[slug];
     var photos = Array.isArray(val) ? val : (val ? [val] : []);
     var override = existingText[slug] || {};
     var desc = typeof override.desc === 'string' ? override.desc : defaultDesc;
     var price = typeof override.price === 'string' ? override.price : defaultPrice;
     var addons = typeof override.addons === 'string' ? override.addons : (defaultAddons || '');
+    var signature = typeof override.signature === 'boolean' ? override.signature : !!defaultSignature;
+    var badge = typeof override.badge === 'string' ? override.badge : (defaultBadge || '');
     return {
       slug: slug, name: name, photos: photos.slice(),
-      desc: desc, price: price, addons: addons, category: category,
+      desc: desc, price: price, addons: addons, signature: signature, badge: badge, category: category,
       hidden: !!structure.hidden[slug], isAdded: !!isAdded
     };
   }
@@ -615,16 +623,19 @@ async function loadItems() {
     var descEl = item ? item.querySelector('.item-desc') : null;
     var priceEl = item ? item.querySelector('.item-price') : null;
     var addonsEl = item ? item.querySelector('.item-addons') : null;
+    var badgeEl = item ? item.querySelector('.sig-badge') : null;
     var defaultDesc = descEl ? descEl.textContent.trim() : '';
     var defaultPrice = priceEl ? priceEl.textContent.trim() : '';
     var defaultAddons = addonsEl ? addonsEl.textContent.trim() : '';
+    var defaultSignature = item ? item.classList.contains('signature') : false;
+    var defaultBadge = badgeEl ? badgeEl.textContent.trim() : '';
     var cat = effectiveCategory(slug, section ? section.id : '');
-    allItems.push(buildItem(slug, name, defaultDesc, defaultPrice, defaultAddons, cat, false));
+    allItems.push(buildItem(slug, name, defaultDesc, defaultPrice, defaultAddons, defaultSignature, defaultBadge, cat, false));
   });
   Object.keys(structure.added).forEach(function(slug) {
     var info = structure.added[slug];
     var cat = effectiveCategory(slug, info.category || '');
-    allItems.push(buildItem(slug, info.name || slug, info.desc || '', info.price || '', info.addons || '', cat, true));
+    allItems.push(buildItem(slug, info.name || slug, info.desc || '', info.price || '', info.addons || '', false, '', cat, true));
   });
 
   // Sort by category (menu order), then by saved position within category
@@ -784,7 +795,12 @@ function buildEditor(item) {
     + '<input class="text-inp" id="priceinp-' + item.slug + '" type="text" placeholder="e.g. $9.99" value="' + esc(item.price) + '">'
     + '<label class="field-label" for="addonsinp-' + item.slug + '">Add-on Note</label>'
     + '<input class="text-inp" id="addonsinp-' + item.slug + '" type="text" placeholder="Example: +Hummus $1 | +Fries $3.99" value="' + esc(item.addons) + '">'
-    + '<button class="btn btn-primary btn-full" onclick="saveText(\'' + item.slug + '\')" id="savetextbtn-' + item.slug + '">Save Description, Price &amp; Add-on</button>'
+    + '<label class="sig-toggle-label" for="sigcheck-' + item.slug + '">'
+    + '<input type="checkbox" id="sigcheck-' + item.slug + '" onchange="toggleBadgeField(\'' + item.slug + '\')"' + (item.signature ? ' checked' : '') + '>'
+    + 'Signature Card (highlighted, with a badge)'
+    + '</label>'
+    + '<input class="text-inp" id="badgeinp-' + item.slug + '" type="text" placeholder="Example: House Signature" value="' + esc(item.badge) + '" style="' + (item.signature ? '' : 'display:none') + '">'
+    + '<button class="btn btn-primary btn-full" onclick="saveText(\'' + item.slug + '\')" id="savetextbtn-' + item.slug + '">Save Item Details</button>'
     + '<label class="field-label" for="movecat-' + item.slug + '">Category</label>'
     + '<select class="text-inp" id="movecat-' + item.slug + '">' + categoryOptions + '</select>'
     + '<button class="btn btn-full" onclick="moveItemCategory(\'' + item.slug + '\')" id="movecatbtn-' + item.slug + '">Move to This Category</button>'
@@ -1038,6 +1054,11 @@ function saveToFirestore(slug, photos, cb) {
 }
 
 // ── Save description & price ───────────────────────────────────────
+function toggleBadgeField(slug) {
+  var checked = document.getElementById('sigcheck-' + slug).checked;
+  document.getElementById('badgeinp-' + slug).style.display = checked ? '' : 'none';
+}
+
 function saveText(slug) {
   var item = allItems.find(function(i) { return i.slug === slug; });
   if (!item) return;
@@ -1045,12 +1066,14 @@ function saveText(slug) {
   var descVal = document.getElementById('descinp-' + slug).value;
   var priceVal = document.getElementById('priceinp-' + slug).value;
   var addonsVal = document.getElementById('addonsinp-' + slug).value;
+  var signatureVal = document.getElementById('sigcheck-' + slug).checked;
+  var badgeVal = document.getElementById('badgeinp-' + slug).value;
   var btn = document.getElementById('savetextbtn-' + slug);
-  var resetLabel = 'Save Description, Price & Add-on';
+  var resetLabel = 'Save Item Details';
   btn.disabled = true; btn.textContent = 'Saving…';
 
   var update = {};
-  update[slug] = { desc: descVal, price: priceVal, addons: addonsVal };
+  update[slug] = { desc: descVal, price: priceVal, addons: addonsVal, signature: signatureVal, badge: badgeVal };
 
   var timer = setTimeout(function() {
     dbg('Text save timed out after 20 s', 'err');
@@ -1064,8 +1087,10 @@ function saveText(slug) {
       item.desc = descVal;
       item.price = priceVal;
       item.addons = addonsVal;
+      item.signature = signatureVal;
+      item.badge = badgeVal;
       dbg('Text save OK', 'ok');
-      showToast('Description, price & add-on saved!');
+      showToast('Item details saved!');
       btn.disabled = false; btn.textContent = resetLabel;
     })
     .catch(function(e) {

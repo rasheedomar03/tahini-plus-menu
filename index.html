@@ -1658,6 +1658,27 @@ var FB_CONFIG = {
         var priceEl = item.querySelector('.item-price');
         if (priceEl) priceEl.textContent = override.price;
       }
+
+      if (typeof override.signature === 'boolean') {
+        item.classList.toggle('signature', override.signature);
+        var badgeEl = item.querySelector('.sig-badge');
+        if (override.signature) {
+          var badgeText = (typeof override.badge === 'string' && override.badge)
+            ? override.badge
+            : (badgeEl ? badgeEl.textContent : 'Signature');
+          if (!badgeEl) {
+            badgeEl = document.createElement('span');
+            badgeEl.className = 'sig-badge';
+            if (mainEl) mainEl.insertBefore(badgeEl, mainEl.firstChild);
+          }
+          badgeEl.textContent = badgeText;
+        } else if (badgeEl) {
+          badgeEl.remove();
+        }
+      } else if (typeof override.badge === 'string' && override.badge) {
+        var badgeOnly = item.querySelector('.sig-badge');
+        if (badgeOnly) badgeOnly.textContent = override.badge;
+      }
     });
 
     // 6) Build-your-own / skewer-pricing list overrides (edited via admin.html)
