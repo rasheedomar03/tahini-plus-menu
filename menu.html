@@ -1180,7 +1180,7 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
         <span class="sig-badge">House Specialty</span>
         <h3 class="item-name">Yumi Yumi</h3>
         <p class="item-desc">A stuffed dough with the meat of your choice, grilled vegetables, and melted cheese, baked to perfection with a drizzle of sesame and black seed.</p>
-        <div class="build-grid" style="margin-top: var(--space-2)">
+        <div class="build-grid" data-build-list="yumi-yumi-options" style="margin-top: var(--space-2)">
           <div class="build-row"><span class="build-name">Kufta Kebab</span><span class="build-price">$14.99</span></div>
           <div class="build-row"><span class="build-name">Chicken Tawook</span><span class="build-price">$14.99</span></div>
           <div class="build-row"><span class="build-name">Beef Skewers</span><span class="build-price">$16.99</span></div>
@@ -1343,7 +1343,7 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
     <div class="build-own">
       <h3>Build Your Own Platter</h3>
       <p class="build-sub">Mix your favorite skewers — all served with rice &amp; salad</p>
-      <div class="build-grid">
+      <div class="build-grid" data-build-list="build-your-own-platter">
         <div class="build-row"><span class="build-name">Lamb Skewer</span><span class="build-price">$9.99</span></div>
         <div class="build-row"><span class="build-name">Beef Skewer</span><span class="build-price">$9.99</span></div>
         <div class="build-row"><span class="build-name">Kufta Kebab</span><span class="build-price">$8.99</span></div>
@@ -1486,12 +1486,14 @@ var FB_CONFIG = {
     var results = await Promise.all([
       db.collection('menu').doc('photos').get().catch(function(){ return null; }),
       db.collection('menu').doc('text').get().catch(function(){ return null; }),
-      db.collection('menu').doc('structure').get().catch(function(){ return null; })
+      db.collection('menu').doc('structure').get().catch(function(){ return null; }),
+      db.collection('menu').doc('buildLists').get().catch(function(){ return null; })
     ]);
-    var photosDoc = results[0], textDoc = results[1], structureDoc = results[2];
+    var photosDoc = results[0], textDoc = results[1], structureDoc = results[2], buildListsDoc = results[3];
     var photosData    = (photosDoc && photosDoc.exists) ? photosDoc.data() : {};
     var textData      = (textDoc && textDoc.exists) ? textDoc.data() : {};
     var structureData = (structureDoc && structureDoc.exists) ? structureDoc.data() : {};
+    var buildListsData = (buildListsDoc && buildListsDoc.exists) ? buildListsDoc.data() : {};
     var hidden = structureData.hidden || {};
     var added  = structureData.added  || {};
     var order  = structureData.order  || {};
@@ -1656,6 +1658,28 @@ var FB_CONFIG = {
         var priceEl = item.querySelector('.item-price');
         if (priceEl) priceEl.textContent = override.price;
       }
+    });
+
+    // 6) Build-your-own / skewer-pricing list overrides (edited via admin.html)
+    Object.keys(buildListsData).forEach(function(listId) {
+      var override = buildListsData[listId];
+      if (!override || !Array.isArray(override.rows)) return;
+      var grid = document.querySelector('.build-grid[data-build-list="'+listId+'"]');
+      if (!grid) return;
+      grid.innerHTML = '';
+      override.rows.forEach(function(row) {
+        var rowEl = document.createElement('div');
+        rowEl.className = 'build-row';
+        var nameEl = document.createElement('span');
+        nameEl.className = 'build-name';
+        nameEl.textContent = row.name || '';
+        var priceEl = document.createElement('span');
+        priceEl.className = 'build-price';
+        priceEl.textContent = row.price || '';
+        rowEl.appendChild(nameEl);
+        rowEl.appendChild(priceEl);
+        grid.appendChild(rowEl);
+      });
     });
   } catch(e) {}
 })();

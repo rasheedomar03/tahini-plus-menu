@@ -133,6 +133,32 @@ select.text-inp { appearance: auto; }
 .cat-order-row .cat-order-name { flex: 1; font-size: 0.85rem; font-weight: 500; }
 .cat-order-row .item-actions { flex-shrink: 0; }
 
+/* ── Build-your-own list panel ────────── */
+.buildlists-panel {
+  background: oklch(97.5% 0.006 82);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.875rem; display: none;
+  flex-direction: column; gap: 1rem;
+}
+.buildlists-panel.visible { display: flex; }
+.buildlist-block {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.75rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.buildlist-title { font-family: var(--font-d); font-size: 0.95rem; }
+.buildlist-sub { font-size: 0.72rem; color: var(--ink-muted); }
+.buildrow-edit {
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.buildrow-edit .text-inp { padding: 0.45rem 0.6rem; font-size: 0.8rem; }
+.buildrow-edit .buildrow-name { flex: 2; min-width: 0; }
+.buildrow-edit .buildrow-price { flex: 1; min-width: 0; }
+.buildlist-addrow {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding-top: 0.5rem; border-top: 1px dashed var(--border);
+}
+
 /* ── Items list ──────────────────────── */
 .items { max-width: 700px; margin: 0 auto; padding: 0 1.25rem 4rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .category-header {
@@ -372,6 +398,8 @@ select.text-inp { appearance: auto; }
     </div>
     <button class="btn btn-full" id="catordertoggle-btn" onclick="toggleCategoryOrderPanel()">Manage Category Order</button>
     <div class="cat-order-panel" id="cat-order-panel"></div>
+    <button class="btn btn-full" id="buildliststoggle-btn" onclick="toggleBuildListsPanel()">Manage Build-Your-Own Lists</button>
+    <div class="buildlists-panel" id="buildlists-panel"></div>
   </div>
 
   <div class="items" id="items-list">
@@ -402,6 +430,7 @@ var fbDb, fbStorage;
 var allItems = []; // { slug, name, photos[], desc, price, category, hidden, isAdded }
 var categoryList = []; // [{id, name}]
 var categoryOrder = {}; // { categoryId: [slug, ...] }
+var buildLists = []; // [{id, title, subtitle, rows:[{name, price}]}]
 var activeSlug = null; // currently expanded card
 var pendingFile = null, pendingUrl = null;
 var toastTimer;
@@ -465,6 +494,26 @@ async function loadItems() {
     );
   });
 
+  // Build default build-your-own / skewer-pricing lists
+  var defaultBuildLists = [];
+  doc.querySelectorAll('.build-grid[data-build-list]').forEach(function(grid) {
+    var id = grid.getAttribute('data-build-list');
+    var block = grid.closest('.build-own') || grid.closest('.item');
+    var titleEl = block ? block.querySelector('h3, .item-name') : null;
+    var subEl = block ? block.querySelector('.build-sub') : null;
+    var rows = Array.prototype.map.call(grid.querySelectorAll('.build-row'), function(r) {
+      var nameEl = r.querySelector('.build-name');
+      var priceEl = r.querySelector('.build-price');
+      return { name: nameEl ? nameEl.textContent.trim() : '', price: priceEl ? priceEl.textContent.trim() : '' };
+    });
+    defaultBuildLists.push({
+      id: id,
+      title: titleEl ? titleEl.textContent.trim() : id,
+      subtitle: subEl ? subEl.textContent.trim() : '',
+      rows: rows
+    });
+  });
+
   // Load existing photos, text overrides, and structure (hidden/added/order) from Firestore
   var existingPhotos = {};
   var existingText = {};
@@ -488,6 +537,18 @@ async function loadItems() {
       structure.categoryOverride = sd.categoryOverride || {};
     }
   } catch(e) { showToast('Could not load menu structure from Firestore.', true); }
+
+  // Merge build-list row overrides on top of the scraped defaults
+  var buildListOverrides = {};
+  try {
+    var blSnap = await fbDb.collection('menu').doc('buildLists').get();
+    if (blSnap.exists) buildListOverrides = blSnap.data();
+  } catch(e) { showToast('Could not load build-your-own lists from Firestore.', true); }
+  buildLists = defaultBuildLists.map(function(list) {
+    var override = buildListOverrides[list.id];
+    var rows = (override && Array.isArray(override.rows)) ? override.rows : list.rows;
+    return { id: list.id, title: list.title, subtitle: list.subtitle, rows: rows.map(function(r){ return {name:r.name, price:r.price}; }) };
+  });
 
   function effectiveCategory(slug, fallbackCategory) {
     return structure.categoryOverride[slug] || fallbackCategory;
@@ -580,6 +641,7 @@ async function loadItems() {
   renderItems(allItems);
   populateCategoryDropdown();
   renderCategoryOrderPanel();
+  renderBuildLists();
   document.getElementById('loading-note') && document.getElementById('loading-note').remove();
 }
 
@@ -1169,6 +1231,125 @@ function moveItemCategory(slug) {
       ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
       : e.message || 'Could not move item.'), true);
     btn.disabled = false; btn.textContent = 'Move to This Category';
+  });
+}
+
+// ── Build-your-own / skewer-pricing lists ──────────────────────────
+function toggleBuildListsPanel() {
+  document.getElementById('buildlists-panel').classList.toggle('visible');
+}
+
+function renderBuildLists() {
+  var panel = document.getElementById('buildlists-panel');
+  if (!panel) return;
+  if (!buildLists.length) {
+    panel.innerHTML = '<div class="note">No build-your-own lists found.</div>';
+    return;
+  }
+  panel.innerHTML = buildLists.map(function(list) {
+    var rowsHtml = list.rows.map(function(row, idx) {
+      return '<div class="buildrow-edit">'
+        + '<input class="text-inp buildrow-name" type="text" id="bl-name-' + list.id + '-' + idx + '" value="' + esc(row.name) + '">'
+        + '<input class="text-inp buildrow-price" type="text" id="bl-price-' + list.id + '-' + idx + '" value="' + esc(row.price) + '">'
+        + '<div class="item-actions">'
+        + '<button class="icon-btn" title="Move up" onclick="moveBuildRow(\'' + list.id + '\',' + idx + ',\'up\')">↑</button>'
+        + '<button class="icon-btn" title="Move down" onclick="moveBuildRow(\'' + list.id + '\',' + idx + ',\'down\')">↓</button>'
+        + '<button class="icon-btn danger" title="Remove row" onclick="removeBuildRow(\'' + list.id + '\',' + idx + ')">🗑</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    return '<div class="buildlist-block">'
+      + '<div class="buildlist-title">' + esc(list.title) + '</div>'
+      + (list.subtitle ? '<div class="buildlist-sub">' + esc(list.subtitle) + '</div>' : '')
+      + rowsHtml
+      + '<div class="buildlist-addrow">'
+      + '<input class="text-inp buildrow-name" type="text" id="newrow-name-' + list.id + '" placeholder="e.g. Chicken Skewer">'
+      + '<input class="text-inp buildrow-price" type="text" id="newrow-price-' + list.id + '" placeholder="e.g. $8.99">'
+      + '<button class="btn" onclick="addBuildRow(\'' + list.id + '\')">+ Add</button>'
+      + '</div>'
+      + '<button class="btn btn-primary btn-full" onclick="saveBuildListRows(\'' + list.id + '\')" id="savebl-' + list.id + '">Save Changes</button>'
+      + '</div>';
+  }).join('');
+}
+
+function saveBuildListEntry(listId, rows) {
+  var update = {};
+  update[listId] = { rows: rows };
+  return fbDb.collection('menu').doc('buildLists').set(update, { merge: true });
+}
+
+function buildListErrorMsg(e, fallback) {
+  return e.code === 'permission-denied'
+    ? 'Firestore rules are blocking writes. Go to Firebase Console → Firestore → Rules and allow writes.'
+    : (e.message || fallback);
+}
+
+function readBuildRowsFromDom(listId) {
+  var list = buildLists.find(function(l) { return l.id === listId; });
+  if (!list) return [];
+  return list.rows.map(function(row, idx) {
+    var nameEl = document.getElementById('bl-name-' + listId + '-' + idx);
+    var priceEl = document.getElementById('bl-price-' + listId + '-' + idx);
+    return {
+      name: nameEl ? nameEl.value.trim() : row.name,
+      price: priceEl ? priceEl.value.trim() : row.price
+    };
+  });
+}
+
+function saveBuildListRows(listId) {
+  var rows = readBuildRowsFromDom(listId);
+  var btn = document.getElementById('savebl-' + listId);
+  btn.disabled = true; btn.textContent = 'Saving…';
+  saveBuildListEntry(listId, rows).then(function() {
+    showToast('Build-your-own list saved!');
+    btn.disabled = false; btn.textContent = 'Save Changes';
+    loadItems();
+  }).catch(function(e) {
+    showToast(buildListErrorMsg(e, 'Could not save list.'), true);
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  });
+}
+
+function moveBuildRow(listId, idx, direction) {
+  var rows = readBuildRowsFromDom(listId);
+  var swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= rows.length) return;
+  var tmp = rows[idx]; rows[idx] = rows[swapIdx]; rows[swapIdx] = tmp;
+  saveBuildListEntry(listId, rows).then(function() {
+    showToast('Order updated!');
+    loadItems();
+  }).catch(function(e) {
+    showToast(buildListErrorMsg(e, 'Could not save order.'), true);
+  });
+}
+
+function removeBuildRow(listId, idx) {
+  var rows = readBuildRowsFromDom(listId);
+  if (!confirm('Remove "' + (rows[idx] ? rows[idx].name : 'this row') + '"?')) return;
+  rows.splice(idx, 1);
+  saveBuildListEntry(listId, rows).then(function() {
+    showToast('Row removed.');
+    loadItems();
+  }).catch(function(e) {
+    showToast(buildListErrorMsg(e, 'Could not remove row.'), true);
+  });
+}
+
+function addBuildRow(listId) {
+  var nameEl = document.getElementById('newrow-name-' + listId);
+  var priceEl = document.getElementById('newrow-price-' + listId);
+  var name = nameEl.value.trim();
+  var price = priceEl.value.trim();
+  if (!name) { showToast('Give the row a name first.', true); return; }
+  var rows = readBuildRowsFromDom(listId);
+  rows.push({ name: name, price: price });
+  saveBuildListEntry(listId, rows).then(function() {
+    showToast('Row added!');
+    loadItems();
+  }).catch(function(e) {
+    showToast(buildListErrorMsg(e, 'Could not add row.'), true);
   });
 }
 
