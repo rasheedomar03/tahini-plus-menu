@@ -1625,6 +1625,11 @@ var FB_CONFIG = {
       if (!item) return;
       var mainEl = item.querySelector('.item-main');
 
+      if (typeof override.name === 'string' && override.name) {
+        var nameOverrideEl = mainEl ? mainEl.querySelector('.item-name') : null;
+        if (nameOverrideEl) nameOverrideEl.textContent = override.name;
+      }
+
       if (typeof override.desc === 'string') {
         var descEl = item.querySelector('.item-desc');
         if (override.desc) {

@@ -608,6 +608,7 @@ async function loadItems() {
     var val = existingPhotos[slug];
     var photos = Array.isArray(val) ? val : (val ? [val] : []);
     var override = existingText[slug] || {};
+    var name = typeof override.name === 'string' && override.name ? override.name : name;
     var desc = typeof override.desc === 'string' ? override.desc : defaultDesc;
     var price = typeof override.price === 'string' ? override.price : defaultPrice;
     var addons = typeof override.addons === 'string' ? override.addons : (defaultAddons || '');
@@ -797,6 +798,8 @@ function buildEditor(item) {
   }).join('');
 
   var textEdit = '<div class="text-edit">'
+    + '<label class="field-label" for="nameinp-' + item.slug + '">Item Name</label>'
+    + '<input class="text-inp" id="nameinp-' + item.slug + '" type="text" placeholder="Item name" value="' + esc(item.name) + '">'
     + '<label class="field-label" for="descinp-' + item.slug + '">Description</label>'
     + '<textarea class="text-inp" id="descinp-' + item.slug + '" rows="2" placeholder="No description">' + esc(item.desc) + '</textarea>'
     + '<label class="field-label" for="priceinp-' + item.slug + '">Price</label>'
@@ -1080,6 +1083,7 @@ function saveText(slug) {
   var item = allItems.find(function(i) { return i.slug === slug; });
   if (!item) return;
 
+  var nameVal = document.getElementById('nameinp-' + slug).value.trim();
   var descVal = document.getElementById('descinp-' + slug).value;
   var priceVal = document.getElementById('priceinp-' + slug).value;
   var addonsVal = document.getElementById('addonsinp-' + slug).value;
@@ -1090,7 +1094,7 @@ function saveText(slug) {
   btn.disabled = true; btn.textContent = 'Saving…';
 
   var update = {};
-  update[slug] = { desc: descVal, price: priceVal, addons: addonsVal, signature: signatureVal, badge: badgeVal };
+  update[slug] = { name: nameVal, desc: descVal, price: priceVal, addons: addonsVal, signature: signatureVal, badge: badgeVal };
 
   var timer = setTimeout(function() {
     dbg('Text save timed out after 20 s', 'err');
@@ -1101,11 +1105,14 @@ function saveText(slug) {
   fbDb.collection('menu').doc('text').set(update, { merge: true })
     .then(function() {
       clearTimeout(timer);
+      item.name = nameVal || item.name;
       item.desc = descVal;
       item.price = priceVal;
       item.addons = addonsVal;
       item.signature = signatureVal;
       item.badge = badgeVal;
+      var cardNameEl = document.querySelector('#card-' + slug + ' .item-name');
+      if (cardNameEl) cardNameEl.textContent = item.name;
       dbg('Text save OK', 'ok');
       showToast('Item details saved!');
       btn.disabled = false; btn.textContent = resetLabel;
