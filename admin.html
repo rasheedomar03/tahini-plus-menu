@@ -504,9 +504,15 @@ async function loadItems() {
   var defaultBuildLists = [];
   doc.querySelectorAll('.build-grid[data-build-list]').forEach(function(grid) {
     var id = grid.getAttribute('data-build-list');
-    var block = grid.closest('.build-own') || grid.closest('.item');
+    var itemEl = grid.closest('.item');
+    var block = itemEl || grid.closest('.build-own');
     var titleEl = block ? block.querySelector('h3, .item-name') : null;
     var subEl = block ? block.querySelector('.build-sub') : null;
+    var linkedSlug = null;
+    if (itemEl) {
+      var photoEl = itemEl.querySelector('.item-photo[data-item]');
+      linkedSlug = photoEl ? photoEl.getAttribute('data-item') : null;
+    }
     var rows = Array.prototype.map.call(grid.querySelectorAll('.build-row'), function(r) {
       var nameEl = r.querySelector('.build-name');
       var priceEl = r.querySelector('.build-price');
@@ -516,6 +522,7 @@ async function loadItems() {
       id: id,
       title: titleEl ? titleEl.textContent.trim() : id,
       subtitle: subEl ? subEl.textContent.trim() : '',
+      linkedSlug: linkedSlug,
       rows: rows
     });
   });
@@ -553,7 +560,7 @@ async function loadItems() {
   buildLists = defaultBuildLists.map(function(list) {
     var override = buildListOverrides[list.id];
     var rows = (override && Array.isArray(override.rows)) ? override.rows : list.rows;
-    return { id: list.id, title: list.title, subtitle: list.subtitle, rows: rows.map(function(r){ return {name:r.name, price:r.price}; }) };
+    return { id: list.id, title: list.title, subtitle: list.subtitle, linkedSlug: list.linkedSlug, rows: rows.map(function(r){ return {name:r.name, price:r.price}; }) };
   });
 
   function effectiveCategory(slug, fallbackCategory) {
@@ -606,10 +613,11 @@ async function loadItems() {
     var addons = typeof override.addons === 'string' ? override.addons : (defaultAddons || '');
     var signature = typeof override.signature === 'boolean' ? override.signature : !!defaultSignature;
     var badge = typeof override.badge === 'string' ? override.badge : (defaultBadge || '');
+    var buildList = buildLists.find(function(l) { return l.linkedSlug === slug; }) || null;
     return {
       slug: slug, name: name, photos: photos.slice(),
       desc: desc, price: price, addons: addons, signature: signature, badge: badge, category: category,
-      hidden: !!structure.hidden[slug], isAdded: !!isAdded
+      hidden: !!structure.hidden[slug], isAdded: !!isAdded, buildList: buildList
     };
   }
 
@@ -806,7 +814,16 @@ function buildEditor(item) {
     + '<button class="btn btn-full" onclick="moveItemCategory(\'' + item.slug + '\')" id="movecatbtn-' + item.slug + '">Move to This Category</button>'
     + '</div>';
 
+  var buildListHtml = '';
+  if (item.buildList) {
+    buildListHtml = '<div class="buildlist-block">'
+      + '<div class="field-label">Pricing Options</div>'
+      + buildRowsEditorHtml(item.buildList)
+      + '</div>';
+  }
+
   return textEdit
+    + buildListHtml
     + '<div class="photos-grid" id="grid-' + item.slug + '">' + slots + '</div>'
     + '<div class="photos-hint" id="hint-' + item.slug + '">' + item.photos.length + ' / 5 photos</div>'
     + '<div class="add-panel" id="addpanel-' + item.slug + '">'
@@ -1264,36 +1281,41 @@ function toggleBuildListsPanel() {
   document.getElementById('buildlists-panel').classList.toggle('visible');
 }
 
+function buildRowsEditorHtml(list) {
+  var rowsHtml = list.rows.map(function(row, idx) {
+    return '<div class="buildrow-edit">'
+      + '<input class="text-inp buildrow-name" type="text" id="bl-name-' + list.id + '-' + idx + '" value="' + esc(row.name) + '">'
+      + '<input class="text-inp buildrow-price" type="text" id="bl-price-' + list.id + '-' + idx + '" value="' + esc(row.price) + '">'
+      + '<div class="item-actions">'
+      + '<button class="icon-btn" title="Move up" onclick="moveBuildRow(\'' + list.id + '\',' + idx + ',\'up\')">↑</button>'
+      + '<button class="icon-btn" title="Move down" onclick="moveBuildRow(\'' + list.id + '\',' + idx + ',\'down\')">↓</button>'
+      + '<button class="icon-btn danger" title="Remove row" onclick="removeBuildRow(\'' + list.id + '\',' + idx + ')">🗑</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  return rowsHtml
+    + '<div class="buildlist-addrow">'
+    + '<input class="text-inp buildrow-name" type="text" id="newrow-name-' + list.id + '" placeholder="e.g. Chicken Skewer">'
+    + '<input class="text-inp buildrow-price" type="text" id="newrow-price-' + list.id + '" placeholder="e.g. $8.99">'
+    + '<button class="btn" onclick="addBuildRow(\'' + list.id + '\')">+ Add</button>'
+    + '</div>'
+    + '<button class="btn btn-primary btn-full" onclick="saveBuildListRows(\'' + list.id + '\')" id="savebl-' + list.id + '">Save Changes</button>';
+}
+
 function renderBuildLists() {
   var panel = document.getElementById('buildlists-panel');
   if (!panel) return;
-  if (!buildLists.length) {
+  var standaloneLists = buildLists.filter(function(l) { return !l.linkedSlug; });
+  if (!standaloneLists.length) {
     panel.innerHTML = '<div class="note">No build-your-own lists found.</div>';
     return;
   }
-  panel.innerHTML = buildLists.map(function(list) {
-    var rowsHtml = list.rows.map(function(row, idx) {
-      return '<div class="buildrow-edit">'
-        + '<input class="text-inp buildrow-name" type="text" id="bl-name-' + list.id + '-' + idx + '" value="' + esc(row.name) + '">'
-        + '<input class="text-inp buildrow-price" type="text" id="bl-price-' + list.id + '-' + idx + '" value="' + esc(row.price) + '">'
-        + '<div class="item-actions">'
-        + '<button class="icon-btn" title="Move up" onclick="moveBuildRow(\'' + list.id + '\',' + idx + ',\'up\')">↑</button>'
-        + '<button class="icon-btn" title="Move down" onclick="moveBuildRow(\'' + list.id + '\',' + idx + ',\'down\')">↓</button>'
-        + '<button class="icon-btn danger" title="Remove row" onclick="removeBuildRow(\'' + list.id + '\',' + idx + ')">🗑</button>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-
+  panel.innerHTML = standaloneLists.map(function(list) {
     return '<div class="buildlist-block">'
       + '<div class="buildlist-title">' + esc(list.title) + '</div>'
       + (list.subtitle ? '<div class="buildlist-sub">' + esc(list.subtitle) + '</div>' : '')
-      + rowsHtml
-      + '<div class="buildlist-addrow">'
-      + '<input class="text-inp buildrow-name" type="text" id="newrow-name-' + list.id + '" placeholder="e.g. Chicken Skewer">'
-      + '<input class="text-inp buildrow-price" type="text" id="newrow-price-' + list.id + '" placeholder="e.g. $8.99">'
-      + '<button class="btn" onclick="addBuildRow(\'' + list.id + '\')">+ Add</button>'
-      + '</div>'
-      + '<button class="btn btn-primary btn-full" onclick="saveBuildListRows(\'' + list.id + '\')" id="savebl-' + list.id + '">Save Changes</button>'
+      + buildRowsEditorHtml(list)
       + '</div>';
   }).join('');
 }
