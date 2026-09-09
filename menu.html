@@ -26,16 +26,17 @@
   --ink:           oklch(20% 0.006 75);
   --ink-muted:     oklch(50% 0.01 75);
   --ink-subtle:    oklch(68% 0.008 75);
-  --olive:         oklch(45% 0.065 82);
-  --terracotta:    oklch(53% 0.108 37);
+  --olive:         oklch(30% 0.006 75);
+  --terracotta:    oklch(18% 0.004 75);
   --accent:        var(--terracotta);
-  --border:        oklch(88% 0.01 82);
-  --border-strong: oklch(80% 0.018 82);
+  --border:        oklch(90% 0.004 75);
+  --border-strong: oklch(80% 0.004 75);
   --halal-bg:      oklch(97% 0.018 145);
   --halal-text:    oklch(36% 0.1 145);
   --halal-border:  oklch(84% 0.042 140);
+  --open-green:    oklch(48% 0.14 145);
 
-  --font-display: 'Fraunces', Georgia, serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
   --font-body:    'Outfit', system-ui, sans-serif;
 
   --text-xs:   0.6875rem;
@@ -80,36 +81,10 @@ body {
 /* ─── Header ─────────────────────────────── */
 .site-header {
   position: relative;
-  overflow: hidden;
   background: var(--surface);
-  border-bottom: 2px solid var(--border);
-  padding: var(--space-12) var(--space-6) var(--space-12);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-8) var(--space-6) var(--space-6);
   text-align: center;
-}
-
-/* Keffiyeh-inspired diamond tile pattern */
-.site-header::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-conic-gradient(
-      oklch(88% 0.02 37) 0% 25%,
-      transparent 0% 50%
-    );
-  background-size: 20px 20px;
-  opacity: 0.18;
-  pointer-events: none;
-}
-
-/* Warm gradient fade at bottom */
-.site-header::after {
-  content: "";
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 60px;
-  background: linear-gradient(to top, var(--surface), transparent);
-  pointer-events: none;
 }
 
 .header-inner {
@@ -122,66 +97,67 @@ body {
 
 .logo-wrap {
   display: inline-block;
-  margin-bottom: var(--space-4);
-  filter: drop-shadow(0 2px 12px oklch(60% 0.04 37 / 0.2));
+  margin-bottom: var(--space-3);
 }
 
 .logo-wrap img {
-  width: 250px;
-  height: 250px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
   display: block;
 }
 
 .site-name {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 3rem);
-  font-weight: 300;
-  color: var(--olive);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 800;
+  color: var(--ink);
   letter-spacing: -0.02em;
   line-height: 1.1;
   margin-bottom: var(--space-2);
 }
 
 .site-name em {
-  color: var(--terracotta);
-  font-style: italic;
-  font-weight: 400;
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 800;
 }
 
 .site-tagline {
   font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.2rem;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.95rem;
   color: var(--ink-muted);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-3);
 }
 
-/* Ornamental divider */
-.header-ornament {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-
-.header-ornament span { font-size: 0.65rem; color: var(--terracotta); letter-spacing: 0.4em; }
-.header-ornament::before,
-.header-ornament::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  max-width: 64px;
-  background: linear-gradient(to right, transparent, var(--terracotta));
-}
-.header-ornament::after { transform: scaleX(-1); }
+.header-ornament { display: none; }
 
 .site-desc {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--ink-muted);
   max-width: 52ch;
-  margin: 0 auto var(--space-5);
-  line-height: 1.7;
+  margin: 0 auto var(--space-4);
+  line-height: 1.6;
+}
+
+.open-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--open-green);
+  margin-bottom: var(--space-4);
+}
+.open-status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--open-green);
+  flex-shrink: 0;
 }
 
 /* Info chips row */
@@ -284,9 +260,9 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 
 .cat-btn.active {
   background: var(--terracotta);
-  color: oklch(98% 0.004 37);
+  color: oklch(98% 0.004 75);
   border-color: var(--terracotta);
-  box-shadow: 0 2px 8px oklch(53% 0.108 37 / 0.28);
+  box-shadow: 0 2px 8px oklch(20% 0.004 75 / 0.28);
 }
 
 .cat-btn:focus-visible {
@@ -300,6 +276,53 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   max-width: 720px;
   margin: 0 auto;
   padding: 0 var(--space-5);
+}
+
+/* ─── Most Ordered ───────────────────────── */
+.most-ordered {
+  padding: var(--space-8) 0 var(--space-4);
+}
+.most-ordered .section-title {
+  margin-bottom: var(--space-4);
+}
+.mo-scroll {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: var(--space-2);
+}
+.mo-scroll::-webkit-scrollbar { display: none; }
+.mo-card {
+  flex: 0 0 auto;
+  width: 148px;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+.mo-card .item-photo {
+  width: 148px;
+  height: 148px;
+  order: 0;
+  align-self: auto;
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+.mo-card .item-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mo-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+  margin-bottom: 0.15rem;
+}
+.mo-price {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-muted);
 }
 
 /* ─── Menu Section ───────────────────────── */
@@ -321,19 +344,14 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 
 .section-title {
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 400;
+  font-size: var(--text-xl);
+  font-weight: 800;
   color: var(--ink);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   line-height: 1;
 }
 
-.section-line {
-  flex: 1;
-  height: 1.5px;
-  background: linear-gradient(to right, oklch(80% 0.02 37 / 0.6), transparent);
-  border-radius: 2px;
-}
+.section-line { display: none; }
 
 /* ─── Menu Items ─────────────────────────── */
 .item {
@@ -341,26 +359,25 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   flex-wrap: wrap;
   align-items: flex-start;
   gap: var(--space-2) var(--space-4);
-  padding: var(--space-6) var(--space-6);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  transition: border-color var(--dur-fast) var(--ease-out),
-              box-shadow var(--dur-fast) var(--ease-out);
+  padding: var(--space-5) 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  transition: background var(--dur-fast) var(--ease-out);
 }
 
 
 .item:hover {
-  border-color: oklch(76% 0.032 37);
-  box-shadow: 0 4px 16px oklch(60% 0.01 75 / 0.09);
+  background: var(--surface-alt);
 }
 
 .item-main { flex: 1 1 160px; min-width: 160px; }
 
 .item-name {
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 400;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--ink);
   line-height: 1.35;
   margin-bottom: var(--space-1);
@@ -551,8 +568,8 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   margin-bottom: var(--space-1);
 }
 
-.footer-name em { color: var(--terracotta); font-style: italic; }
-.footer-tagline { font-family: var(--font-display); font-style: italic; font-size: var(--text-sm); color: oklch(58% 0.01 75); margin-bottom: var(--space-5); }
+.footer-name em { color: oklch(92% 0.012 82); font-style: normal; font-weight: 800; }
+.footer-tagline { font-family: var(--font-display); font-style: normal; font-size: var(--text-sm); color: oklch(58% 0.01 75); margin-bottom: var(--space-5); }
 .footer-info { font-size: var(--text-sm); line-height: 1.9; }
 .footer-social { display: flex; justify-content: center; gap: var(--space-4); margin: var(--space-5) 0 var(--space-4); }
 .footer-social a {
@@ -561,7 +578,7 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   background: oklch(30% 0.012 75); color: oklch(85% 0.008 82);
   transition: color 0.15s, background 0.15s, transform 0.15s;
 }
-.footer-social a:hover { color: #fff; background: var(--terracotta); transform: translateY(-1px); }
+.footer-social a:hover { color: oklch(24% 0.01 75); background: oklch(92% 0.012 82); transform: translateY(-1px); }
 .footer-note { margin-top: var(--space-6); font-size: var(--text-xs); color: oklch(44% 0.008 75); letter-spacing: 0.04em; }
 
 
@@ -587,40 +604,29 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 
 /* ─── Item photo placeholder ─────────────── */
 .item-photo {
-  width: 116px;
-  height: 116px;
+  width: 96px;
+  height: 96px;
   flex-shrink: 0;
-  align-self: flex-start;
-  order: -1;
-  border-radius: var(--radius-sm);
-  background: #fff;
-  border: 2px dashed oklch(80% 0.028 37);
+  align-self: center;
+  order: 2;
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  border: none;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.item-photo:hover {
-  border-color: var(--terracotta);
-  box-shadow: 0 0 0 3px oklch(53% 0.108 37 / 0.12);
-}
-.item-photo:has(> img) {
-  border: 1px solid var(--ink);
-}
-.item-photo:has(> img):hover {
-  border-color: var(--terracotta);
 }
 .item-photo:not(:has(> img))::after {
   content: '';
   display: block;
-  width: 42px;
-  height: 42px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9a98a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z'/%3E%3Ccircle cx='12' cy='13' r='4'/%3E%3C/svg%3E") center/contain no-repeat;
-  opacity: 0.65;
+  width: 34px;
+  height: 34px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b5b5b5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z'/%3E%3Ccircle cx='12' cy='13' r='4'/%3E%3C/svg%3E") center/contain no-repeat;
+  opacity: 0.6;
 }
-.item-photo img { width:100%; height:100%; object-fit:contain; display:block; }
+.item-photo img { width:100%; height:100%; object-fit:cover; display:block; }
 
 /* ─── Responsive ─────────────────────────── */
 @media (min-width: 600px) {
@@ -730,8 +736,8 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
       <img src="logo.png" alt="Tahini Plus Halal Kitchen logo">
     </div>
     <p class="site-tagline">"Tradition Served Beautifully."</p>
-    <div class="header-ornament"><span>✦ ✦ ✦</span></div>
     <p class="site-desc">Authentic Mediterranean &amp; Middle Eastern cuisine, prepared with care, passion, and halal-certified ingredients.</p>
+    <span class="open-status">Open now</span>
     <div class="header-chips">
       <span class="info-chip">
         <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A5.5 5.5 0 1 0 13.5 7 5.507 5.507 0 0 0 8 1.5zm0 10A4.5 4.5 0 1 1 12.5 7 4.505 4.505 0 0 1 8 11.5zm.75-4.5V4.5a.75.75 0 0 0-1.5 0v3a.75.75 0 0 0 .22.53l2 2a.75.75 0 1 0 1.06-1.06z" fill="currentColor"/></svg>
@@ -771,6 +777,54 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 
 <!-- ── MENU ─────────────────────────────── -->
 <main class="menu-content">
+
+  <section class="most-ordered" id="most-ordered">
+    <div class="section-header">
+      <h2 class="section-title">Most Ordered</h2>
+    </div>
+    <div class="mo-scroll">
+      <a class="mo-card" href="#sandwiches">
+        <div class="item-photo" data-item="chicken-shawarma"><img src="https://tahiniplushalalkitchen.com/pluto-images/replatedMenuPhoto0526/plating-v0.72/PA48noJ2OlVk/57oNbhCx9ESC-207e5774ab999e96.png" alt=""></div>
+        <div class="mo-name">Chicken Shawarma</div>
+        <div class="mo-price">$10.99</div>
+      </a>
+      <a class="mo-card" href="#mains">
+        <div class="item-photo" data-item="maqlobeh-chicken-pot-2-to-3"><img src="https://tahiniplushalalkitchen.com/pluto-images/replatedMenuPhoto0526/plating-v0.72/PA48noJ2OlVk/TqZtr0aJQnQb-e603b2e6c63edf08.png" alt=""></div>
+        <div class="mo-name">Maqlobeh Chicken Pot (2 To 3)</div>
+        <div class="mo-price">$34.99</div>
+      </a>
+      <a class="mo-card" href="#mains">
+        <div class="item-photo" data-item="mansaf-1-meat"><img src="https://tahiniplushalalkitchen.com/pluto-images/replatedMenuPhoto0526/plating-v0.72/PA48noJ2OlVk/8hqMUMsYU7NQ-865b0fd1c39aa8ca.png" alt=""></div>
+        <div class="mo-name">Mansaf 1 Meat</div>
+        <div class="mo-price">$19.99</div>
+      </a>
+      <a class="mo-card" href="#sandwiches">
+        <div class="item-photo" data-item="beef-shawarma"><img src="https://tahiniplushalalkitchen.com/pluto-images/funnel/images/2772503c-340e-4c42-971d-ae1d1c15ff2c" alt=""></div>
+        <div class="mo-name">Beef Shawarma</div>
+        <div class="mo-price">$11.99</div>
+      </a>
+      <a class="mo-card" href="#sandwiches">
+        <div class="item-photo" data-item="yummy-yummy-stuffed-dough"><img src="https://tahiniplushalalkitchen.com/pluto-images/funnel/images/834a7db7-3895-4e29-ab95-615f2eb80fdf" alt=""></div>
+        <div class="mo-name">Yummy Yummy Stuffed Dough</div>
+        <div class="mo-price">$14.99</div>
+      </a>
+      <a class="mo-card" href="#mains">
+        <div class="item-photo" data-item="musakhan-half-chicken"><img src="https://tahiniplushalalkitchen.com/pluto-images/funnel/images/d9462b81-c2ef-4240-8934-0581d168f1ee" alt=""></div>
+        <div class="mo-name">Musakhan Half Chicken</div>
+        <div class="mo-price">$17.99</div>
+      </a>
+      <a class="mo-card" href="#appetizers">
+        <div class="item-photo" data-item="hummus-large"><img src="https://tahiniplushalalkitchen.com/pluto-images/funnel/images/6aa658e3-eeb5-4df5-9aad-f3c954e882aa" alt=""></div>
+        <div class="mo-name">Hummus large</div>
+        <div class="mo-price">$9.99</div>
+      </a>
+      <a class="mo-card" href="#appetizers">
+        <div class="item-photo" data-item="falafel-8pc"><img src="https://tahiniplushalalkitchen.com/pluto-images/funnel/images/f9934340-857b-43e4-beb9-b1daa31448e3" alt=""></div>
+        <div class="mo-name">Falafel (8pc)</div>
+        <div class="mo-price">$6.99</div>
+      </a>
+    </div>
+  </section>
 
   <section class="menu-section" id="soup">
     <div class="section-header">
@@ -1118,12 +1172,13 @@ var FB_CONFIG = {
     var order  = structureData.order  || {};
     var categoryOverride = structureData.categoryOverride || {};
 
-    // 1) Hide removed items
+    // 1) Hide removed items (every occurrence — e.g. a Most Ordered card and its category row)
     Object.keys(hidden).forEach(function(slug) {
       if (!hidden[slug]) return;
-      var el = document.querySelector('.item-photo[data-item="'+slug+'"]');
-      var item = el ? el.closest('.item') : null;
-      if (item) item.remove();
+      document.querySelectorAll('.item-photo[data-item="'+slug+'"]').forEach(function(el) {
+        var item = el.closest('.item');
+        if (item) item.remove();
+      });
     });
 
     // 2) Insert newly added items into their category section
@@ -1168,9 +1223,11 @@ var FB_CONFIG = {
     Object.keys(categoryOverride).forEach(function(slug) {
       if (hidden[slug]) return;
       var targetSection = document.getElementById(categoryOverride[slug]);
-      var el = document.querySelector('.item-photo[data-item="'+slug+'"]');
-      var itemEl = el ? el.closest('.item') : null;
-      if (targetSection && itemEl) targetSection.appendChild(itemEl);
+      if (!targetSection) return;
+      document.querySelectorAll('.item-photo[data-item="'+slug+'"]').forEach(function(el) {
+        var itemEl = el.closest('.item');
+        if (itemEl) targetSection.appendChild(itemEl);
+      });
     });
 
     // 3) Apply saved item order within each category
@@ -1232,15 +1289,16 @@ var FB_CONFIG = {
       window._photosMap = window._photosMap || {};
       window._photosMap[slug] = urls;
       document.querySelectorAll('.item-photo[data-item="'+slug+'"]').forEach(function(el) {
-        el.innerHTML = '<img src="'+urls[0]+'" alt="" style="width:100%;height:100%;object-fit:contain">';
+        el.innerHTML = '<img src="'+urls[0]+'" alt="" style="width:100%;height:100%;object-fit:cover">';
       });
     });
 
     // 5) Description, price & add-on note overrides (edited via admin.html)
+    // Applied to every occurrence of the item (e.g. a Most Ordered card and its category row).
     Object.keys(textData).forEach(function(slug) {
       var override = textData[slug] || {};
-      var photoEl = document.querySelector('.item-photo[data-item="'+slug+'"]');
-      var item = photoEl ? photoEl.closest('.item') : null;
+      document.querySelectorAll('.item-photo[data-item="'+slug+'"]').forEach(function(photoEl) {
+      var item = photoEl.closest('.item');
       if (!item) return;
       var mainEl = item.querySelector('.item-main');
 
@@ -1303,6 +1361,7 @@ var FB_CONFIG = {
         var badgeOnly = item.querySelector('.sig-badge');
         if (badgeOnly) badgeOnly.textContent = override.badge;
       }
+      });
     });
 
     // 6) Build-your-own / skewer-pricing list overrides (edited via admin.html)
