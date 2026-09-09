@@ -67,6 +67,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; overflow-x: clip; }
 html, body { overflow-x: clip; }
+a { text-decoration: none; color: inherit; }
 
 /* ─── Base ───────────────────────────────── */
 body {
@@ -145,19 +146,10 @@ body {
 .open-status {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--open-green);
   margin-bottom: var(--space-4);
-}
-.open-status::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--open-green);
-  flex-shrink: 0;
 }
 
 /* Info chips row */
@@ -285,6 +277,9 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 .most-ordered .section-title {
   margin-bottom: var(--space-4);
 }
+.mo-wrap {
+  position: relative;
+}
 .mo-scroll {
   display: flex;
   gap: var(--space-4);
@@ -295,11 +290,33 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
   padding-bottom: var(--space-2);
 }
 .mo-scroll::-webkit-scrollbar { display: none; }
+.mo-arrow {
+  display: flex;
+  position: absolute;
+  top: 64px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px oklch(20% 0.006 75 / 0.16);
+  z-index: 2;
+  padding: 0;
+}
+.mo-arrow:hover { background: var(--surface-alt); }
+.mo-arrow-left { left: -4px; }
+.mo-arrow-right { right: -4px; }
 .mo-card {
   flex: 0 0 auto;
   width: 148px;
   scroll-snap-align: start;
   cursor: pointer;
+  text-decoration: none;
 }
 .mo-card .item-photo {
   width: 148px;
@@ -791,7 +808,11 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
     <div class="section-header">
       <h2 class="section-title">Most Ordered</h2>
     </div>
-    <div class="mo-scroll">
+    <div class="mo-wrap">
+    <button class="mo-arrow mo-arrow-left" type="button" aria-label="Scroll left" onclick="scrollMostOrdered(-1)">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="mo-scroll" id="mo-scroll">
       <a class="mo-card" href="#sandwiches">
         <div class="item-photo" data-item="chicken-shawarma"><img src="https://tahiniplushalalkitchen.com/pluto-images/replatedMenuPhoto0526/plating-v0.72/PA48noJ2OlVk/57oNbhCx9ESC-207e5774ab999e96.png" alt=""></div>
         <div class="mo-name">Chicken Shawarma</div>
@@ -832,6 +853,10 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
         <div class="mo-name">Falafel (8pc)</div>
         <div class="mo-price">$6.99</div>
       </a>
+    </div>
+    <button class="mo-arrow mo-arrow-right" type="button" aria-label="Scroll right" onclick="scrollMostOrdered(1)">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
     </div>
   </section>
 
@@ -1130,6 +1155,13 @@ a.info-chip:hover { color: var(--terracotta); border-color: var(--terracotta); }
 </footer>
 
 
+<script>
+function scrollMostOrdered(direction) {
+  var scroller = document.getElementById('mo-scroll');
+  if (!scroller) return;
+  scroller.scrollBy({ left: direction * 300, behavior: 'smooth' });
+}
+</script>
 <script>
 (function() {
   const sections = document.querySelectorAll('.menu-section');
